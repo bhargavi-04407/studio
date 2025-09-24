@@ -13,15 +13,17 @@ const AskQuestionInput = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
-  }))
+  })),
+  chatId: z.string().optional(),
 });
 
 export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
   try {
-    const { question, language, messages } = AskQuestionInput.parse(input);
+    const { question, language, messages, chatId } = AskQuestionInput.parse(input);
     const userId = auth.currentUser?.uid;
 
     let answer: string;
+    let newChatId = chatId;
     
     // We don't want to send the full message list, just the history
     const history = messages.slice(0, -1);
@@ -41,13 +43,19 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     
     if (userId) {
         const newMessages = [...messages, { role: 'assistant' as const, content: answer }];
-        // We only save history for chats with one user message
-        if (newMessages.filter(m => m.role === 'user').length > 0) {
-             await saveChatSession(userId, newMessages.filter(m => m.role !== 'system').map(m => ({role: m.role as 'user' | 'assistant', content: m.content})));
+        const messagesToSave = newMessages
+            .filter(m => m.role !== 'system')
+            .map(m => ({role: m.role as 'user' | 'assistant', content: m.content}));
+
+        if (messagesToSave.length > 0) {
+             const result = await saveChatSession(userId, messagesToSave, newChatId);
+             if (result.success) {
+                newChatId = result.chatId;
+             }
         }
     }
 
-    return { success: true, answer };
+    return { success: true, answer, chatId: newChatId };
   } catch (error) {
     console.error(error);
     if (error instanceof z.ZodError) {

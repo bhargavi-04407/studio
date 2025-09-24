@@ -59,7 +59,8 @@ type ChatSession = Awaited<ReturnType<typeof getChatHistory>>['history'][0];
 interface ChatInterfaceProps {
   selectedLanguage: string;
   chatSession: ChatSession | null;
-  onNewChatCreated: () => void;
+  onNewChatCreated: (chatId?: string) => void;
+  key: string;
 }
 
 function UserAvatar() {
@@ -133,6 +134,8 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState<string | undefined>(chatSession?.id);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   
@@ -145,10 +148,12 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
     };
 
     if (chatSession) {
+      setCurrentChatId(chatSession.id);
       return [
         ...chatSession.messages.map((m, i) => ({...m, id: `${chatSession.id}-${i}`}))
       ];
     }
+    setCurrentChatId(undefined);
     return [systemMessage];
   }, [chatSession]);
 
@@ -242,24 +247,14 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
     const currentMessages = [...messages, userMessage];
     setMessages((prev) => [...prev, userMessage, typingMessage]);
     form.reset();
-    
-    const isNewChat = !chatSession;
 
     const result = await askQuestion({
       question: values.message,
       language: selectedLanguage,
-      messages: currentMessages.map(m => ({role: m.role, content: m.content}))
+      messages: currentMessages.map(m => ({role: m.role, content: m.content})),
+      chatId: currentChatId
     });
     
-    // After getting a response, refresh the history list
-    if (isNewChat) {
-      // Use a timeout to give the database a moment to update
-      setTimeout(onNewChatCreated, 1500);
-    } else {
-      onNewChatCreated();
-    }
-
-
     if (result.success && result.answer) {
       const assistantMessage: Message = {
         id: typingMessage.id, // Replace typing message
@@ -267,6 +262,19 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
         content: result.answer,
       };
       setMessages((prev) => prev.map(m => m.id === typingMessage.id ? assistantMessage : m));
+      
+      if (result.chatId && result.chatId !== currentChatId) {
+        setCurrentChatId(result.chatId);
+      }
+      
+      // After getting a response, refresh the history list
+      if (!currentChatId) {
+         // Use a timeout to give the database a moment to update
+        setTimeout(() => onNewChatCreated(result.chatId), 1000);
+      } else {
+        onNewChatCreated();
+      }
+
     } else {
       toast({
         variant: "destructive",

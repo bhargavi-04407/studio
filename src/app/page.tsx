@@ -37,6 +37,18 @@ export default function Home() {
       fetchHistory();
     }
   }, [user, loading, router, fetchHistory]);
+  
+  const handleHistoryUpdate = useCallback((newChatId?: string) => {
+    fetchHistory().then(() => {
+      if (newChatId) {
+        // If a new chat was created, find it in the updated history and select it
+        const newChat = history.find(c => c.id === newChatId);
+        if (newChat) {
+          setSelectedChat(newChat);
+        }
+      }
+    });
+  }, [fetchHistory, history]);
 
   const handleSelectChat = (chat: ChatSession) => {
     setSelectedChat(chat);
@@ -64,10 +76,10 @@ export default function Home() {
       />
       <div className="flex-1 md:w-3/5 lg:w-2/3 h-full overflow-y-auto">
         <ChatInterface 
+          key={selectedChat?.id || 'new-chat'}
           selectedLanguage={selectedLanguage}
           chatSession={selectedChat}
-          onNewChatCreated={fetchHistory}
-          key={selectedChat?.id || 'new-chat'}
+          onNewChatCreated={handleHistoryUpdate}
         />
       </div>
       <div className="hidden md:block md:w-2/5 lg:w-1/3 h-full border-l border-gray-200/50 dark:border-gray-800/50">
