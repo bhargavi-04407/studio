@@ -9,13 +9,13 @@ body {
 @layer base {
   :root {
     --background: 30 50% 98%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 217 91% 60%; /* Blue */
 
     --card: 30 50% 96%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 217 91% 60%; /* Blue */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 217 91% 60%; /* Blue */
 
     --primary: 160 100% 24%;
     --primary-foreground: 0 0% 100%;
@@ -27,7 +27,7 @@ body {
     --muted-foreground: 215.4 16.3% 46.9%;
 
     --accent: 45 92% 55%;
-    --accent-foreground: 240 10% 3.9%;
+    --accent-foreground: 217 91% 60%; /* Blue */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -36,24 +36,22 @@ body {
     --input: 214.3 31.8% 91.4%;
     --ring: 160 100% 24%;
 
-    --radius: 0.75rem;
+    --background-start-rgb: 249, 249, 246; /* Soft ivory #F9F9F6 */
+    --background-end-rgb: 230, 242, 241; /* Muted teal #E6F2F1 */
 
-    --background-start-rgb: 150, 242, 221;
-    --background-end-rgb: 249, 249, 246;
-
-    --user-bubble: 130 100% 97%;
+    --user-bubble: 220 13% 91%; /* Pale Green in HSL */
     --user-bubble-foreground: 240 10% 3.9%;
-    --assistant-bubble: 200 92% 94%;
+    --assistant-bubble: 210 100% 95%; /* Light Blue #E3F2FD */
     --assistant-bubble-foreground: 240 10% 3.9%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --foreground: 217 91% 60%; /* Blue */
     --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 217 91% 60%; /* Blue */
     --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover-foreground: 217 91% 60%; /* Blue */
     --primary: 160 100% 34%;
     --primary-foreground: 0 0% 100%;
     --secondary: 25 95% 61%;
@@ -61,7 +59,7 @@ body {
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 45 92% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 217 91% 60%; /* Blue */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
@@ -69,8 +67,8 @@ body {
     --ring: 160 100% 34%;
     --radius: 0.75rem;
 
-    --background-start-rgb: 222, 84%, 4.9%;
-    --background-end-rgb: 222, 84%, 4.9%;
+    --background-start-rgb: 24, 32, 44;
+    --background-end-rgb: 10, 14, 20;
 
     --user-bubble: 222.2 84% 8%;
     --user-bubble-foreground: 210 40% 98%;
