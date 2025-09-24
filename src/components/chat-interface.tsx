@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,10 +19,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search, Mic } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { askQuestion } from "@/app/actions";
+import { getChatHistory } from "@/app/history/actions";
 import {
   Tooltip,
   TooltipContent,
@@ -41,24 +43,42 @@ type Message = {
   isTyping?: boolean;
 };
 
+type ChatSession = Awaited<ReturnType<typeof getChatHistory>>['history'][0];
+
 interface ChatInterfaceProps {
   selectedLanguage: string;
+  chatSession: ChatSession | null;
+  onNewChatCreated: () => void;
 }
 
-export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
+export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated }: ChatInterfaceProps) {
   const { toast } = useToast();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Welcome to MediLexica. How can I help you with your medical questions today?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  
+  const initialMessages = useMemo(() => {
+    const systemMessage = {
+      id: "1",
+      role: "assistant" as const,
+      content:
+        "Welcome to MediLexica. How can I help you with your medical questions today?",
+    };
+
+    if (chatSession) {
+      return [
+        systemMessage,
+        ...chatSession.messages.map((m, i) => ({...m, id: `${chatSession.id}-${i}`}))
+      ];
+    }
+    return [systemMessage];
+  }, [chatSession]);
+
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
 
   const form = useForm<z.infer<typeof chatFormSchema>>({
@@ -142,13 +162,20 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
       content: '...',
       isTyping: true
     };
-
+    
+    const currentMessages = [...messages, userMessage];
     setMessages((prev) => [...prev, userMessage, typingMessage]);
     form.reset();
     
+    // If it's the first user message in a new chat, call onNewChatCreated
+    if (!chatSession && currentMessages.filter(m => m.role === 'user').length === 1) {
+        setTimeout(onNewChatCreated, 1500); // give db time to update
+    }
+
     const result = await askQuestion({
       question: values.message,
       language: selectedLanguage,
+      messages: currentMessages.map(m => ({role: m.role, content: m.content}))
     });
 
     if (result.success && result.answer) {
@@ -195,8 +222,8 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
                       "rounded-2xl p-4 text-base shadow-lg space-y-2 transition-all duration-300",
                        message.isTyping && "animate-pulse",
                       message.role === "user"
-                        ? "bg-[--user-bubble] text-[--user-bubble-foreground] rounded-br-none"
-                        : "bg-[--assistant-bubble] text-[--assistant-bubble-foreground] rounded-bl-none border border-black/5"
+                        ? "bg-blue-100 text-black rounded-br-none"
+                        : "bg-white text-black rounded-bl-none border border-black/5"
                     )}
                   >
                     <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>

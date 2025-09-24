@@ -1,23 +1,50 @@
+
 "use client";
 
 import { ChatInterface } from "@/components/chat-interface";
 import { InfoPanel } from "@/components/info-panel";
+import { HistorySidebar } from "@/components/history-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { medicalTerms } from "@/lib/medical-terms";
+import { getChatHistory, type saveChatSession } from "./history/actions";
+
+type ChatSession = Awaited<ReturnType<typeof getChatHistory>>['history'][0];
 
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [history, setHistory] = useState<ChatSession[]>([]);
+  const [selectedChat, setSelectedChat] = useState<ChatSession | null>(null);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+
+  const fetchHistory = useCallback(async () => {
+    if (user) {
+      setIsHistoryLoading(true);
+      const { history: chatHistory } = await getChatHistory(user.uid);
+      setHistory(chatHistory);
+      setIsHistoryLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
+    } else {
+      fetchHistory();
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, fetchHistory]);
+
+  const handleSelectChat = (chat: ChatSession) => {
+    setSelectedChat(chat);
+  };
+  
+  const handleNewChat = () => {
+    setSelectedChat(null);
+  };
 
   if (loading || !user) {
     return (
@@ -29,8 +56,19 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-full bg-gradient-to-br from-[rgb(var(--background-start-rgb))] to-[rgb(var(--background-end-rgb))]">
-      <div className="w-full md:w-3/5 lg:w-2/3 h-full overflow-y-auto">
-        <ChatInterface selectedLanguage={selectedLanguage} />
+      <HistorySidebar 
+        history={history}
+        onSelectChat={handleSelectChat}
+        onNewChat={handleNewChat}
+        isLoading={isHistoryLoading}
+      />
+      <div className="flex-1 md:w-3/5 lg:w-2/3 h-full overflow-y-auto">
+        <ChatInterface 
+          selectedLanguage={selectedLanguage}
+          chatSession={selectedChat}
+          onNewChatCreated={fetchHistory}
+          key={selectedChat?.id || 'new-chat'}
+        />
       </div>
       <div className="hidden md:block md:w-2/5 lg:w-1/3 h-full border-l border-gray-200/50 dark:border-gray-800/50">
         <InfoPanel 
