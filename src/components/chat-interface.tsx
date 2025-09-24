@@ -38,6 +38,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useAuth } from "@/hooks/use-auth";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 
 
 const chatFormSchema = z.object({
@@ -58,6 +61,72 @@ interface ChatInterfaceProps {
   chatSession: ChatSession | null;
   onNewChatCreated: () => void;
 }
+
+function UserAvatar() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      toast({ title: "Signed out successfully!" });
+      router.push('/welcome');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign out failed",
+        description: error.message,
+      });
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background cursor-pointer">
+          {user?.photoURL ? (
+            <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
+          ) : (
+            <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+              <span>🙂</span>
+            </AvatarFallback>
+          )}
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sign out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+const AssistantMessage = ({ content }: { content: string }) => {
+  const parts = content.split(/\n\n/);
+  const summary = parts.find(p => p.startsWith('**Summary:**'))?.replace('**Summary:**', '').trim();
+  const details = parts.find(p => p.startsWith('**Details:**'))?.replace('**Details:**', '').trim();
+
+  if (summary && details) {
+    return (
+      <>
+        <p className="whitespace-pre-wrap leading-relaxed font-medium">{summary}</p>
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1" className="border-b-0">
+            <AccordionTrigger className="text-sm py-2 hover:no-underline justify-start gap-1">Show Details</AccordionTrigger>
+            <AccordionContent>
+              <p className="whitespace-pre-wrap leading-relaxed">{details}</p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </>
+    );
+  }
+
+  return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
+};
 
 export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated }: ChatInterfaceProps) {
   const { toast } = useToast();
@@ -227,14 +296,18 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                 <div className={cn("flex flex-col gap-2 max-w-2xl", message.role === 'user' && 'items-end')}>
                   <div
                     className={cn(
-                      "rounded-2xl p-4 text-base shadow-lg space-y-2 transition-all duration-300 text-[hsl(var(--primary))] dark:text-white",
+                      "rounded-2xl p-4 text-base shadow-lg space-y-2 transition-all duration-300 text-[hsl(var(--accent))] dark:text-[hsl(var(--accent))]",
                        message.isTyping && "animate-pulse",
                       message.role === "user"
                         ? "bg-blue-100 rounded-br-none"
                         : "bg-white rounded-bl-none border border-black/5"
                     )}
                   >
-                    <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <AssistantMessage content={message.content} />
+                    ) : (
+                      <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    )}
                   </div>
                   {message.role === 'assistant' && !message.isTyping && (
                     <div className="flex items-center gap-2">
@@ -334,51 +407,3 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
     </div>
   );
 }
-
-
-import { useAuth } from "@/hooks/use-auth";
-import Image from "next/image";
-
-function UserAvatar() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();
-      toast({ title: "Signed out successfully!" });
-      router.push('/welcome');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Sign out failed",
-        description: error.message,
-      });
-    }
-  };
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background cursor-pointer">
-          {user?.photoURL ? (
-            <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
-          ) : (
-            <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-              <span>🙂</span>
-            </AvatarFallback>
-          )}
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-    
-    

@@ -22,7 +22,8 @@ const IntelligentMedicalChatInputSchema = z.object({
 export type IntelligentMedicalChatInput = z.infer<typeof IntelligentMedicalChatInputSchema>;
 
 const IntelligentMedicalChatOutputSchema = z.object({
-  answer: z.string().describe('The answer to the medical question based on the Gale Encyclopedia.'),
+  summary: z.string().describe('A short, one or two sentence summary of the answer.'),
+  answer: z.string().describe('The detailed answer to the medical question based on the Gale Encyclopedia.'),
 });
 export type IntelligentMedicalChatOutput = z.infer<typeof IntelligentMedicalChatOutputSchema>;
 
@@ -35,6 +36,8 @@ const prompt = ai.definePrompt({
   input: {schema: IntelligentMedicalChatInputSchema},
   output: {schema: IntelligentMedicalChatOutputSchema},
   prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia. Use the provided conversation history to understand the context of the user's question.
+
+First, provide a short, one or two sentence summary of the answer. Then, provide the full, detailed answer.
 
 {{#if history}}
 Conversation History:

@@ -28,7 +28,7 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
 
     if (language === "en") {
       const response = await intelligentMedicalChat({ question, history });
-      answer = response.answer;
+      answer = `**Summary:** ${response.summary}\n\n**Details:** ${response.answer}`;
     } else {
       const response = await translateQuery({
         query: question,
@@ -36,7 +36,7 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
         targetLanguage: language,
         history,
       });
-      answer = response.translatedResponse;
+      answer = `**Summary:** ${response.summary}\n\n**Details:** ${response.translatedResponse}`;
     }
     
     if (userId) {

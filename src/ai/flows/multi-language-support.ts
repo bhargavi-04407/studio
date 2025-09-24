@@ -27,7 +27,8 @@ const MultiLanguageSupportInputSchema = z.object({
 export type MultiLanguageSupportInput = z.infer<typeof MultiLanguageSupportInputSchema>;
 
 const MultiLanguageSupportOutputSchema = z.object({
-  translatedResponse: z.string().describe('The medical answer in the target language.'),
+  summary: z.string().describe('A short, one or two sentence summary of the answer, in the target language.'),
+  translatedResponse: z.string().describe('The detailed medical answer in the target language.'),
 });
 export type MultiLanguageSupportOutput = z.infer<typeof MultiLanguageSupportOutputSchema>;
 
@@ -43,6 +44,8 @@ const multiLanguagePrompt = ai.definePrompt({
 A user is asking a medical question in {{sourceLanguage}}.
 Provide a comprehensive answer to their question based on the information in the Gale Encyclopedia. If it is relevant, you can suggest potential medicines.
 Your entire response must be in {{targetLanguage}}.
+
+First, provide a short, one or two sentence summary of the answer in {{targetLanguage}}. Then, provide the full, detailed answer in {{targetLanguage}}.
 Use the provided conversation history to understand the context of the user's question.
 
 {{#if history}}
@@ -70,8 +73,6 @@ const multiLanguageSupportFlow = ai.defineFlow(
     const history = input.history.map(m => new Message({role: m.role as Role, content: [{text: m.content}]}));
 
     const {output} = await multiLanguagePrompt({...input, history});
-    return {
-      translatedResponse: output!.translatedResponse
-    };
+    return output!;
   }
 );
