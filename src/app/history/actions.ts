@@ -2,7 +2,7 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { z } from 'zod';
 
 const MessageSchema = z.object({
@@ -34,15 +34,15 @@ export async function saveChatSession(input: ChatSessionInput) {
         let currentChatId = chatId;
         
         if (currentChatId) {
-            // Update an existing chat document
+            // A chat already exists, update it with the new messages
             const docRef = doc(db, 'chatSessions', currentChatId);
-            await setDoc(docRef, {
+            await updateDoc(docRef, {
                 messages,
                 updatedAt: serverTimestamp(),
-            }, { merge: true });
+            });
             return { success: true, chatId: currentChatId };
         } else {
-            // Create a new chat document
+            // This is a new chat, create a new document
             const title = messages.find(m => m.role === 'user')?.content.substring(0, 30) || 'New Chat';
             const newDocRef = await addDoc(collection(db, 'chatSessions'), {
                 userId,
@@ -54,7 +54,8 @@ export async function saveChatSession(input: ChatSessionInput) {
             return { success: true, chatId: newDocRef.id };
         }
     } catch (error) {
-        console.error('Error saving chat session: ', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error saving chat session: ', errorMessage);
         return { success: false, error: 'Failed to save chat session.' };
     }
 }
@@ -76,7 +77,6 @@ export async function getChatHistory(userId: string) {
         const querySnapshot = await getDocs(q);
         const history = querySnapshot.docs.map(doc => {
             const data = doc.data();
-            // Ensure updatedAt exists and is a timestamp before converting
             const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
             const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
             return {
