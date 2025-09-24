@@ -146,7 +146,6 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
 
     if (chatSession) {
       return [
-        systemMessage,
         ...chatSession.messages.map((m, i) => ({...m, id: `${chatSession.id}-${i}`}))
       ];
     }
@@ -244,16 +243,22 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
     setMessages((prev) => [...prev, userMessage, typingMessage]);
     form.reset();
     
-    // If it's the first user message in a new chat, call onNewChatCreated
-    if (!chatSession && currentMessages.filter(m => m.role === 'user').length === 1) {
-        setTimeout(onNewChatCreated, 1500); // give db time to update
-    }
+    const isNewChat = !chatSession;
 
     const result = await askQuestion({
       question: values.message,
       language: selectedLanguage,
       messages: currentMessages.map(m => ({role: m.role, content: m.content}))
     });
+    
+    // After getting a response, refresh the history list
+    if (isNewChat) {
+      // Use a timeout to give the database a moment to update
+      setTimeout(onNewChatCreated, 1500);
+    } else {
+      onNewChatCreated();
+    }
+
 
     if (result.success && result.answer) {
       const assistantMessage: Message = {

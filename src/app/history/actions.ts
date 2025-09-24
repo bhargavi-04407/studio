@@ -2,7 +2,7 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, doc, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
 
 const MessageSchema = z.object({
@@ -21,12 +21,33 @@ export async function saveChatSession(userId: string, messages: z.infer<typeof M
     }
     
     try {
-        await addDoc(collection(db, 'chatSessions'), {
-            userId,
-            messages,
-            createdAt: serverTimestamp(),
-            title: messages[0]?.content.substring(0, 30) || 'New Chat'
-        });
+        // Find existing chat by first user message
+        const title = messages[0]?.content.substring(0, 30) || 'New Chat';
+        const q = query(
+            collection(db, 'chatSessions'),
+            where('userId', '==', userId),
+            where('title', '==', title),
+            limit(1)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            // Update existing chat
+            const docRef = querySnapshot.docs[0].ref;
+            await setDoc(docRef, {
+                messages,
+                updatedAt: serverTimestamp(),
+            }, { merge: true });
+        } else {
+            // Create new chat
+            await addDoc(collection(db, 'chatSessions'), {
+                userId,
+                messages,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                title: messages[0]?.content.substring(0, 30) || 'New Chat'
+            });
+        }
         return { success: true };
     } catch (error) {
         console.error('Error saving chat session: ', error);
@@ -43,7 +64,7 @@ export async function getChatHistory(userId: string) {
         const q = query(
             collection(db, 'chatSessions'),
             where('userId', '==', userId),
-            orderBy('createdAt', 'desc'),
+            orderBy('updatedAt', 'desc'),
             limit(50)
         );
 
@@ -54,6 +75,7 @@ export async function getChatHistory(userId: string) {
                 id: doc.id,
                 title: data.title,
                 createdAt: data.createdAt.toDate().toISOString(),
+                updatedAt: data.updatedAt.toDate().toISOString(),
                 messages: data.messages
             };
         });

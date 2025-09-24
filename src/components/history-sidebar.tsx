@@ -62,7 +62,7 @@ export function HistorySidebar({ history, onSelectChat, onNewChat, isLoading }: 
               >
                 <p className="font-semibold truncate text-foreground">{session.title}</p>
                 <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(session.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(session.updatedAt), { addSuffix: true })}
                 </p>
               </button>
             ))

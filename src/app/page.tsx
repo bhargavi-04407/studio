@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { medicalTerms } from "@/lib/medical-terms";
-import { getChatHistory, type saveChatSession } from "./history/actions";
+import { getChatHistory } from "./history/actions";
 
 type ChatSession = Awaited<ReturnType<typeof getChatHistory>>['history'][0];
 

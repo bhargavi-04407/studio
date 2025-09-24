@@ -41,8 +41,8 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     
     if (userId) {
         const newMessages = [...messages, { role: 'assistant' as const, content: answer }];
-        // We only save history for chats with more than one user message
-        if (newMessages.filter(m => m.role === 'user').length > 1) {
+        // We only save history for chats with one user message
+        if (newMessages.filter(m => m.role === 'user').length > 0) {
              await saveChatSession(userId, newMessages.filter(m => m.role !== 'system').map(m => ({role: m.role as 'user' | 'assistant', content: m.content})));
         }
     }
