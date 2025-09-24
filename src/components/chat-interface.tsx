@@ -309,7 +309,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button type="button" size="icon" onClick={handleVoiceSearch} disabled={isSubmitting} className={cn("rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute left-2 top-1/2 -translate-y-1/2 bg-[hsl(var(--navy-blue))] hover:bg-[hsl(var(--navy-blue))]/90 text-[hsl(var(--navy-blue-foreground))]", isListening && "bg-red-500 hover:bg-red-600")}>
+                             <Button type="button" size="icon" onClick={handleVoiceSearch} disabled={isSubmitting} className={cn("rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute left-2 top-1/2 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white", isListening && "bg-red-500 hover:bg-red-600")}>
                                 <Mic className="w-5 h-5" />
                                 <span className="sr-only">Voice Search</span>
                               </Button>
@@ -318,7 +318,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                       </TooltipProvider>
 
-                      <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute right-2 top-1/2 -translate-y-1/2 bg-[hsl(var(--navy-blue))] hover:bg-[hsl(var(--navy-blue))]/90 text-[hsl(var(--navy-blue-foreground))]">
+                      <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute right-2 top-1/2 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white">
                         <Send className="w-5 h-5" />
                         <span className="sr-only">Send</span>
                       </Button>
