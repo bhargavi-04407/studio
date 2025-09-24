@@ -45,11 +45,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const isProtectedRoute = protectedRoutes.includes(pathname);
     const isPublicRoute = publicRoutes.includes(pathname);
-
+    
+    // Allow access to public routes if not logged in
     if (!user && isProtectedRoute) {
         router.push('/welcome');
     }
     
+    // Redirect to home if logged in and trying to access a public route
     if (user && isPublicRoute) {
         router.push('/');
     }

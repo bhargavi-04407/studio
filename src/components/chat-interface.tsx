@@ -37,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 
 const chatFormSchema = z.object({
@@ -336,11 +337,13 @@ import Image from "next/image";
 function UserAvatar() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     try {
       await auth.signOut();
       toast({ title: "Signed out successfully!" });
+      router.push('/welcome');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -372,5 +375,4 @@ function UserAvatar() {
     </DropdownMenu>
   );
 }
-
     
