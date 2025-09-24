@@ -31,7 +31,8 @@ const prompt = ai.definePrompt({
   input: {schema: IntelligentMedicalChatInputSchema},
   output: {schema: IntelligentMedicalChatOutputSchema},
   prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia. 
-If the question is about a specific disease or condition, provide a short, 1-2 word image search query that would visually represent the disease (e.g., "skin rash", "inflamed appendix"). If the question is not about a visual condition, do not provide an image query.
+
+Only if the user explicitly asks for an image of a disease, provide a short, 1-2 word image search query in English that would visually represent that disease (e.g., "skin rash", "inflamed appendix"). If the user does not ask for an image, do not provide an image query.
 
 Question: {{{question}}}`,
 });
