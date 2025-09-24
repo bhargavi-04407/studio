@@ -80,7 +80,9 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
   }, [messages]);
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
@@ -90,6 +92,7 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         form.setValue("message", transcript);
+        setIsListening(false);
       };
 
       recognitionRef.current.onerror = (event: any) => {
