@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { LayoutProvider } from "@/components/layout-provider";
 import "./globals.css";
+import { AuthProvider } from "@/hooks/use-auth";
 
 export const metadata: Metadata = {
   title: "MediLexica",
@@ -24,7 +25,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <LayoutProvider>{children}</LayoutProvider>
+        <AuthProvider>
+          <LayoutProvider>{children}</LayoutProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

@@ -186,11 +186,7 @@ export function ChatInterface() {
                   )}
                 </div>
                 {message.role === "user" && (
-                   <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
-                    <AvatarFallback className="bg-primary/20 text-primary">
-                      <User className="w-6 h-6" />
-                    </AvatarFallback>
-                  </Avatar>
+                   <UserAvatar />
                 )}
               </div>
             ))}
@@ -229,5 +225,24 @@ export function ChatInterface() {
         </Form>
       </div>
     </div>
+  );
+}
+
+
+import { useAuth } from "@/hooks/use-auth";
+import Image from "next/image";
+
+function UserAvatar() {
+  const { user } = useAuth();
+  return (
+    <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
+      {user?.photoURL ? (
+        <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
+      ) : (
+        <AvatarFallback className="bg-primary/20 text-primary">
+          <User className="w-6 h-6" />
+        </AvatarFallback>
+      )}
+    </Avatar>
   );
 }
