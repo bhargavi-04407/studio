@@ -75,11 +75,13 @@ export async function getChatHistory(userId: string) {
         const querySnapshot = await getDocs(q);
         const history = querySnapshot.docs.map(doc => {
             const data = doc.data();
+            const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
+            const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
             return {
                 id: doc.id,
                 title: data.title,
-                createdAt: data.createdAt.toDate().toISOString(),
-                updatedAt: data.updatedAt.toDate().toISOString(),
+                createdAt: createdAt.toISOString(),
+                updatedAt: updatedAt.toISOString(),
                 messages: data.messages
             };
         });
