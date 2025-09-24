@@ -25,8 +25,7 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     let answer: string;
     let newChatId = chatId;
     
-    // We don't want to send the full message list to the AI, just the history
-    const history = messages.slice(0, -1);
+    const history = messages.slice(0, -1).filter(m => m.role !== 'system');
 
     if (language === "en") {
       const response = await intelligentMedicalChat({ question, history });
@@ -42,25 +41,25 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     }
     
     if (userId) {
-        const newMessages = [...messages, { role: 'assistant' as const, content: answer }];
-        const messagesToSave = newMessages
+        // Form the complete message history for saving
+        const finalMessages = [...messages, { role: 'assistant' as const, content: answer }]
             .filter(m => m.role !== 'system')
             .map(m => ({role: m.role as 'user' | 'assistant', content: m.content}));
 
-        if (messagesToSave.length > 0) {
-             const result = await saveChatSession({userId, messages: messagesToSave, chatId: newChatId});
-             if (result.success && result.chatId) {
-                newChatId = result.chatId;
-             }
+        // Save in the background, but get the chatId immediately if it's a new chat
+        const saveResult = await saveChatSession({ userId, messages: finalMessages, chatId: newChatId });
+        if (saveResult.success && saveResult.chatId) {
+            newChatId = saveResult.chatId;
         }
     }
 
     return { success: true, answer, chatId: newChatId };
   } catch (error) {
-    console.error(error);
+    console.error("Critical error in askQuestion:", error);
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid input." };
     }
-    return { success: false, error: "An error occurred. Please try again." };
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    return { success: false, error: `An error occurred while getting the answer: ${errorMessage}` };
   }
 }

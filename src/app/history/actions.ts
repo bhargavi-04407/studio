@@ -31,16 +31,18 @@ export async function saveChatSession(input: ChatSessionInput) {
     }
     
     try {
-        if (chatId) {
-            // Update an existing chat
-            const docRef = doc(db, 'chatSessions', chatId);
+        let currentChatId = chatId;
+        
+        if (currentChatId) {
+            // Update an existing chat document
+            const docRef = doc(db, 'chatSessions', currentChatId);
             await setDoc(docRef, {
                 messages,
                 updatedAt: serverTimestamp(),
             }, { merge: true });
-            return { success: true, chatId: docRef.id };
+            return { success: true, chatId: currentChatId };
         } else {
-            // Create a new chat
+            // Create a new chat document
             const title = messages.find(m => m.role === 'user')?.content.substring(0, 30) || 'New Chat';
             const newDocRef = await addDoc(collection(db, 'chatSessions'), {
                 userId,
