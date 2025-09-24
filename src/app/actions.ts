@@ -22,15 +22,19 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     const userId = auth.currentUser?.uid;
 
     let answer: string;
+    
+    // We don't want to send the full message list, just the history
+    const history = messages.slice(0, -1);
 
     if (language === "en") {
-      const response = await intelligentMedicalChat({ question });
+      const response = await intelligentMedicalChat({ question, history });
       answer = response.answer;
     } else {
       const response = await translateQuery({
         query: question,
         sourceLanguage: language,
         targetLanguage: language,
+        history,
       });
       answer = response.translatedResponse;
     }

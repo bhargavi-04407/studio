@@ -12,12 +12,17 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { Message, Role } from 'genkit';
 import {z} from 'genkit';
 
 const MultiLanguageSupportInputSchema = z.object({
   query: z.string().describe("The user's medical question in their native language."),
   sourceLanguage: z.string().describe('The language of the user query (e.g., es, fr, hi).'),
   targetLanguage: z.string().describe('The desired language for the response, which should be the same as the source language.'),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string(),
+  })).describe('The previous messages in the conversation.'),
 });
 export type MultiLanguageSupportInput = z.infer<typeof MultiLanguageSupportInputSchema>;
 
@@ -38,8 +43,20 @@ const multiLanguagePrompt = ai.definePrompt({
 A user is asking a medical question in {{sourceLanguage}}.
 Provide a comprehensive answer to their question based on the information in the Gale Encyclopedia. If it is relevant, you can suggest potential medicines.
 Your entire response must be in {{targetLanguage}}.
+Use the provided conversation history to understand the context of the user's question.
 
-User's question: "{{{query}}}"
+{{#if history}}
+Conversation History (in {{sourceLanguage}}):
+{{#each history}}
+  {{#if (eq role 'user')}}
+User: {{{content}}}
+  {{else if (eq role 'assistant')}}
+Assistant: {{{content}}}
+  {{/if}}
+{{/each}}
+{{/if}}
+
+User's current question: "{{{query}}}"
 `,
 });
 
@@ -50,7 +67,9 @@ const multiLanguageSupportFlow = ai.defineFlow(
     outputSchema: MultiLanguageSupportOutputSchema,
   },
   async input => {
-    const {output} = await multiLanguagePrompt(input);
+    const history = input.history.map(m => new Message({role: m.role as Role, content: [{text: m.content}]}));
+
+    const {output} = await multiLanguagePrompt({...input, history});
     return {
       translatedResponse: output!.translatedResponse
     };
