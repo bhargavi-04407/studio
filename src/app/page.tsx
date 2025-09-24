@@ -27,7 +27,9 @@ export default function Home() {
       const { history: chatHistory } = await getChatHistory(user.uid);
       setHistory(chatHistory);
       setIsHistoryLoading(false);
+      return chatHistory;
     }
+    return [];
   }, [user]);
 
   useEffect(() => {
@@ -38,17 +40,15 @@ export default function Home() {
     }
   }, [user, loading, router, fetchHistory]);
   
-  const handleHistoryUpdate = useCallback((newChatId?: string) => {
-    fetchHistory().then(() => {
-      if (newChatId) {
-        // If a new chat was created, find it in the updated history and select it
-        const newChat = history.find(c => c.id === newChatId);
-        if (newChat) {
-          setSelectedChat(newChat);
-        }
+  const handleHistoryUpdate = useCallback(async (newChatId?: string) => {
+    const updatedHistory = await fetchHistory();
+    if (newChatId) {
+      const newChat = updatedHistory.find(c => c.id === newChatId);
+      if (newChat) {
+        setSelectedChat(newChat);
       }
-    });
-  }, [fetchHistory, history]);
+    }
+  }, [fetchHistory]);
 
   const handleSelectChat = (chat: ChatSession) => {
     setSelectedChat(chat);
