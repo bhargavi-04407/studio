@@ -30,6 +30,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { askQuestion } from "@/app/actions";
+import Image from "next/image";
 
 const chatFormSchema = z.object({
   message: z.string().min(1, "Message cannot be empty"),
@@ -39,6 +40,7 @@ type Message = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
+  imageUrl?: string;
 };
 
 const languages = [
@@ -109,11 +111,12 @@ export function ChatInterface() {
       language: selectedLanguage,
     });
 
-    if (result.success) {
+    if (result.success && result.answer) {
       const assistantMessage: Message = {
         id: String(Date.now() + 2),
         role: "assistant",
         content: result.answer,
+        imageUrl: result.imageUrl,
       };
       setMessages((prev) => prev.map(m => m.id === typingMessageId ? assistantMessage : m));
     } else {
@@ -170,13 +173,18 @@ export function ChatInterface() {
                 )}
                 <div
                   className={cn(
-                    "max-w-xl rounded-xl p-4 text-base shadow-md",
+                    "max-w-xl rounded-xl p-4 text-base shadow-md space-y-4",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-card"
                   )}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
+                   {message.imageUrl && (
+                    <div className="relative aspect-video rounded-lg overflow-hidden border">
+                      <Image src={message.imageUrl} alt="Relevant medical image" fill className="object-cover" />
+                    </div>
+                  )}
                 </div>
                 {message.role === "user" && (
                    <Avatar className="w-10 h-10 border-2 border-primary shadow-sm">

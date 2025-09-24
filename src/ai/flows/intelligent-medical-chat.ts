@@ -18,6 +18,7 @@ export type IntelligentMedicalChatInput = z.infer<typeof IntelligentMedicalChatI
 
 const IntelligentMedicalChatOutputSchema = z.object({
   answer: z.string().describe('The answer to the medical question based on the Gale Encyclopedia.'),
+  imageQuery: z.string().optional().describe('A 1-2 word search query for a relevant medical image. For example, "brain anatomy" or "skin rash".'),
 });
 export type IntelligentMedicalChatOutput = z.infer<typeof IntelligentMedicalChatOutputSchema>;
 
@@ -29,7 +30,9 @@ const prompt = ai.definePrompt({
   name: 'intelligentMedicalChatPrompt',
   input: {schema: IntelligentMedicalChatInputSchema},
   output: {schema: IntelligentMedicalChatOutputSchema},
-  prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia.\n\nQuestion: {{{question}}}`,
+  prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia. Also, provide a short, 1-2 word image search query that is relevant to the topic.
+
+Question: {{{question}}}`,
 });
 
 const intelligentMedicalChatFlow = ai.defineFlow(
