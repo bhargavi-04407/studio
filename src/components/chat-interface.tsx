@@ -333,8 +333,8 @@ function UserAvatar() {
       {user?.photoURL ? (
         <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
       ) : (
-        <AvatarFallback className="bg-primary/20 text-primary">
-          <User className="w-6 h-6" />
+        <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+          <span>🙂</span>
         </AvatarFallback>
       )}
     </Avatar>
