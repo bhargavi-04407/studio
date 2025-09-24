@@ -89,7 +89,7 @@ function UserAvatar() {
             <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
           ) : (
             <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-              <span>🙂</span>
+              <span>👤</span>
             </AvatarFallback>
           )}
         </Avatar>
@@ -300,7 +300,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                        message.isTyping && "animate-pulse",
                       message.role === "user"
                         ? "bg-[hsl(var(--user-bubble))] text-[hsl(var(--user-bubble-foreground))] rounded-br-none"
-                        : "bg-[hsl(var(--assistant-bubble))] text-[hsl(var(--assistant-bubble-foreground))] rounded-bl-none border border-black/5"
+                        : "bg-[hsl(var(--assistant-bubble))] text-[hsl(var(--assistant-bubble-foreground))] rounded-bl-none border border-black/5 dark:border-white/5"
                     )}
                   >
                     {message.role === 'assistant' ? (
@@ -314,7 +314,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-green-100 hover:text-green-600">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-green-100 dark:hover:bg-green-900/50 hover:text-green-600 dark:hover:text-green-400">
                               <ThumbsUp className="w-4 h-4" />
                             </Button>
                           </TooltipTrigger>
@@ -322,7 +322,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-red-100 hover:text-red-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-red-100 dark:hover:bg-red-900/50 hover:text-red-600 dark:hover:text-red-400">
                                 <ThumbsDown className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
@@ -330,7 +330,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-blue-100 hover:text-blue-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400">
                                 <Book className="w-4 h-4" />
                               </Button>                          
                           </TooltipTrigger>
@@ -338,7 +338,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-yellow-100 hover:text-yellow-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-yellow-100 dark:hover:bg-yellow-900/50 hover:text-yellow-600 dark:hover:text-yellow-400">
                                 <Search className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>

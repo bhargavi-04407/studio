@@ -11,8 +11,8 @@ body {
     --background: 230 40% 98%;
     --foreground: 240 10% 3.9%; /* Black */
 
-    --card: 230 40% 96%;
-    --card-foreground: 240 10% 3.9%; /* Black */
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
@@ -49,12 +49,15 @@ body {
   }
 
   .dark {
-    --background: 170 40% 10%;
+    --background: 170 40% 5%;
     --foreground: 210 40% 98%; /* White */
-    --card: 170 40% 12%;
+    
+    --card: 170 40% 10%;
     --card-foreground: 210 40% 98%; /* White */
-    --popover: 170 40% 10%;
+    
+    --popover: 170 40% 5%;
     --popover-foreground: 210 40% 98%;
+    
     --primary: 170 80% 40%;
     --primary-foreground: 0 0% 100%;
     
@@ -63,23 +66,27 @@ body {
     
     --secondary: 25 95% 61%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 217.2 32.6% 17.5%;
+    
+    --muted: 170 30% 15%;
     --muted-foreground: 215 20.2% 65.1%;
+    
     --accent: 170 70% 50%;
     --accent-foreground: 0 0% 100%;
+    
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    
+    --border: 170 30% 20%;
+    --input: 170 30% 20%;
     --ring: 170 80% 40%;
     --radius: 0.75rem;
 
     --background-start-rgb: 10, 25, 30; /* Dark Ocean Green */
     --background-end-rgb: 10, 14, 20;
 
-    --user-bubble: 222.2 84% 12%;
+    --user-bubble: 220 50% 18%;
     --user-bubble-foreground: 210 40% 98%;
-    --assistant-bubble: 170 50% 15%;
+    --assistant-bubble: 170 40% 15%;
     --assistant-bubble-foreground: 210 40% 98%;
   }
 }
