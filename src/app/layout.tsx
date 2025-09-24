@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { LayoutProvider } from "@/components/layout-provider";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/use-auth";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "MediLexica",
@@ -25,9 +26,16 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <AuthProvider>
-          <LayoutProvider>{children}</LayoutProvider>
-        </AuthProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <AuthProvider>
+            <LayoutProvider>{children}</LayoutProvider>
+          </AuthProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

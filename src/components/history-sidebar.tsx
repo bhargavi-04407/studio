@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ChevronsLeft, History, Loader2, Plus, MessageSquare } from "lucide-react";
 import { useState } from "react";
@@ -32,17 +32,8 @@ export function HistorySidebar({ history, onSelectChat, onNewChat, isLoading }: 
     setIsOpen(false);
   }
 
-  const content = (
-    <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <History className="w-6 h-6 text-primary" />
-          <h2 className="text-xl font-bold text-foreground">Chat History</h2>
-        </div>
-         <Button variant="ghost" size="icon" className="h-8 w-8 lg:hidden" onClick={() => setIsOpen(false)}>
-            <ChevronsLeft className="w-5 h-5" />
-        </Button>
-      </div>
+  const sidebarContent = (
+    <>
       <Button onClick={handleNewChat} className="mb-4 w-full" variant="outline">
         <Plus className="w-4 h-4 mr-2" />
         New Chat
@@ -62,7 +53,7 @@ export function HistorySidebar({ history, onSelectChat, onNewChat, isLoading }: 
               >
                 <p className="font-semibold truncate text-foreground">{session.title}</p>
                 <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(session.createdAt), { addSuffix: true })}
+                    {session.updatedAt ? formatDistanceToNow(new Date(session.updatedAt), { addSuffix: true }) : 'Just now'}
                 </p>
               </button>
             ))
@@ -75,14 +66,20 @@ export function HistorySidebar({ history, onSelectChat, onNewChat, isLoading }: 
           )}
         </div>
       </ScrollArea>
-    </div>
+    </>
   );
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-72 border-r border-gray-200/30 dark:border-gray-800/30">
-        {content}
+      <div className="hidden lg:flex flex-col w-72 border-r border-gray-200/30 dark:border-gray-800/30 bg-card/80 backdrop-blur-sm p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <History className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Chat History</h2>
+          </div>
+        </div>
+        {sidebarContent}
       </div>
 
       {/* Mobile Sheet */}
@@ -94,10 +91,22 @@ export function HistorySidebar({ history, onSelectChat, onNewChat, isLoading }: 
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 border-none">
-            {content}
+             <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm p-4">
+                <SheetHeader className="mb-4">
+                    <SheetTitle className="flex items-center gap-2">
+                        <History className="w-6 h-6 text-primary" />
+                        <span>Chat History</span>
+                    </SheetTitle>
+                    <SheetDescription className="sr-only">
+                    A list of your past chat sessions. You can select a session to view it or start a new chat.
+                    </SheetDescription>
+                </SheetHeader>
+                {sidebarContent}
+             </div>
           </SheetContent>
         </Sheet>
       </div>
     </>
   );
 }
+

@@ -12,17 +12,23 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { Message, Role } from 'genkit';
 import {z} from 'genkit';
 
 const MultiLanguageSupportInputSchema = z.object({
   query: z.string().describe("The user's medical question in their native language."),
   sourceLanguage: z.string().describe('The language of the user query (e.g., es, fr, hi).'),
   targetLanguage: z.string().describe('The desired language for the response, which should be the same as the source language.'),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string(),
+  })).describe('The previous messages in the conversation.'),
 });
 export type MultiLanguageSupportInput = z.infer<typeof MultiLanguageSupportInputSchema>;
 
 const MultiLanguageSupportOutputSchema = z.object({
-  translatedResponse: z.string().describe('The medical answer in the target language.'),
+  summary: z.string().describe('A short, one or two sentence summary of the answer, in the target language.'),
+  translatedResponse: z.string().describe('The detailed medical answer in the target language.'),
 });
 export type MultiLanguageSupportOutput = z.infer<typeof MultiLanguageSupportOutputSchema>;
 
@@ -39,7 +45,17 @@ A user is asking a medical question in {{sourceLanguage}}.
 Provide a comprehensive answer to their question based on the information in the Gale Encyclopedia. If it is relevant, you can suggest potential medicines.
 Your entire response must be in {{targetLanguage}}.
 
-User's question: "{{{query}}}"
+First, provide a short, one or two sentence summary of the answer in {{targetLanguage}}. Then, provide the full, detailed answer in {{targetLanguage}}.
+Use the provided conversation history to understand the context of the user's question.
+
+{{#if history}}
+Conversation History (in {{sourceLanguage}}):
+{{#each history}}
+{{role}}: {{{content}}}
+{{/each}}
+{{/if}}
+
+User's current question: "{{{query}}}"
 `,
 });
 
@@ -50,9 +66,9 @@ const multiLanguageSupportFlow = ai.defineFlow(
     outputSchema: MultiLanguageSupportOutputSchema,
   },
   async input => {
-    const {output} = await multiLanguagePrompt(input);
-    return {
-      translatedResponse: output!.translatedResponse
-    };
+    const history = input.history.map(m => new Message({role: m.role as Role, content: [{text: m.content}]}));
+
+    const {output} = await multiLanguagePrompt({...input, history});
+    return output!;
   }
 );

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { medicalTerms } from "@/lib/medical-terms";
-import { getChatHistory, type saveChatSession } from "./history/actions";
+import { getChatHistory } from "./history/actions";
 
 type ChatSession = Awaited<ReturnType<typeof getChatHistory>>['history'][0];
 
@@ -20,6 +20,7 @@ export default function Home() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [selectedChat, setSelectedChat] = useState<ChatSession | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [historyKey, setHistoryKey] = useState(Date.now()); // Used to force re-fetch
 
   const fetchHistory = useCallback(async () => {
     if (user) {
@@ -27,7 +28,9 @@ export default function Home() {
       const { history: chatHistory } = await getChatHistory(user.uid);
       setHistory(chatHistory);
       setIsHistoryLoading(false);
+      return chatHistory;
     }
+    return [];
   }, [user]);
 
   useEffect(() => {
@@ -36,7 +39,17 @@ export default function Home() {
     } else if (user) {
       fetchHistory();
     }
-  }, [user, loading, router, fetchHistory]);
+  }, [user, loading, router, fetchHistory, historyKey]);
+  
+  const handleHistoryUpdate = useCallback(async (newChatId?: string) => {
+    const updatedHistory = await fetchHistory();
+    if (newChatId) {
+      const newChat = updatedHistory.find(c => c.id === newChatId);
+      if (newChat) {
+        setSelectedChat(newChat);
+      }
+    }
+  }, [fetchHistory]);
 
   const handleSelectChat = (chat: ChatSession) => {
     setSelectedChat(chat);
@@ -64,10 +77,10 @@ export default function Home() {
       />
       <div className="flex-1 md:w-3/5 lg:w-2/3 h-full overflow-y-auto">
         <ChatInterface 
+          key={selectedChat?.id || 'new-chat'}
           selectedLanguage={selectedLanguage}
           chatSession={selectedChat}
-          onNewChatCreated={fetchHistory}
-          key={selectedChat?.id || 'new-chat'}
+          onHistoryUpdate={handleHistoryUpdate}
         />
       </div>
       <div className="hidden md:block md:w-2/5 lg:w-1/3 h-full border-l border-gray-200/50 dark:border-gray-800/50">

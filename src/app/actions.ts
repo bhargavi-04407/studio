@@ -2,6 +2,7 @@
 "use server";
 
 import { intelligentMedicalChat } from "@/ai/flows/intelligent-medical-chat";
+import { textToSpeech } from "@/ai/flows/text-to-speech";
 import { translateQuery } from "@/ai/flows/multi-language-support";
 import { z } from "zod";
 import { saveChatSession } from "./history/actions";
@@ -13,42 +14,77 @@ const AskQuestionInput = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
-  }))
+  })),
+  chatId: z.string().optional(),
 });
 
 export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
   try {
-    const { question, language, messages } = AskQuestionInput.parse(input);
+    const { question, language, messages, chatId } = AskQuestionInput.parse(input);
     const userId = auth.currentUser?.uid;
 
     let answer: string;
+    let summary: string;
+    
+    // Filter out the system message before sending to AI
+    const historyForAI = messages.filter(m => m.role !== 'system');
 
     if (language === "en") {
-      const response = await intelligentMedicalChat({ question });
+      const response = await intelligentMedicalChat({ question, history: historyForAI });
+      summary = response.summary;
       answer = response.answer;
     } else {
       const response = await translateQuery({
         query: question,
         sourceLanguage: language,
         targetLanguage: language,
+        history: historyForAI,
       });
+      summary = response.summary;
       answer = response.translatedResponse;
     }
     
+    const finalAnswer = `**Summary:** ${summary}\n\n**Details:** ${answer}`;
+    
+    let newChatId = chatId;
     if (userId) {
-        const newMessages = [...messages, { role: 'assistant' as const, content: answer }];
-        // We only save history for chats with more than one user message
-        if (newMessages.filter(m => m.role === 'user').length > 1) {
-             await saveChatSession(userId, newMessages.filter(m => m.role !== 'system').map(m => ({role: m.role as 'user' | 'assistant', content: m.content})));
-        }
+      const finalMessages = [...messages, { role: 'user' as const, content: question }, { role: 'assistant' as const, content: finalAnswer }]
+        .filter(m => m.role !== 'system')
+        .map(m => ({role: m.role as 'user' | 'assistant', content: m.content}));
+
+      const saveResult = await saveChatSession({ userId, messages: finalMessages, chatId: newChatId });
+
+      if (saveResult.success && saveResult.chatId) {
+          newChatId = saveResult.chatId;
+      } else if (!saveResult.success) {
+        console.error("Failed to save chat session:", saveResult.error);
+      }
     }
 
-    return { success: true, answer };
+    return { success: true, answer: finalAnswer, chatId: newChatId };
   } catch (error) {
-    console.error(error);
+    console.error("Critical error in askQuestion:", error);
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid input." };
     }
-    return { success: false, error: "An error occurred. Please try again." };
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    return { success: false, error: `An error occurred while getting the answer: ${errorMessage}` };
   }
+}
+
+const GetSpeechInput = z.object({
+  text: z.string(),
+  languageCode: z.string().optional(),
+});
+
+export async function getSpeech(input: z.infer<typeof GetSpeechInput>) {
+    try {
+        const { text, languageCode } = GetSpeechInput.parse(input);
+        const { audio } = await textToSpeech({ text, languageCode });
+        return { success: true, audio };
+    } catch (error) {
+        console.error("Error in getSpeech:", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        return { success: false, error: `Failed to generate speech: ${errorMessage}` };
+    }
 }

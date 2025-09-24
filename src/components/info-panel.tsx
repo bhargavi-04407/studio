@@ -6,6 +6,8 @@ import {
   Languages,
   Library,
   Search as SearchIcon,
+  Moon,
+  Sun,
 } from "lucide-react";
 import {
   Select,
@@ -19,6 +21,9 @@ import type { MedicalTerm } from "@/lib/medical-terms";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useTheme } from "next-themes";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
 
 const languages = [
   { value: "en", label: "English" },
@@ -42,6 +47,7 @@ interface InfoPanelProps {
 
 export function InfoPanel({ terms, selectedLanguage, onLanguageChange }: InfoPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { theme, setTheme } = useTheme();
 
   const filteredTerms = useMemo(() => {
     if (!searchQuery) {
@@ -60,33 +66,54 @@ export function InfoPanel({ terms, selectedLanguage, onLanguageChange }: InfoPan
         <div className="flex items-center gap-3 mb-2">
           <Globe className="w-7 h-7 text-primary" />
           <h2 className="text-2xl font-bold text-foreground text-shadow-sm">
-            Language & Glossary
+            Settings & Glossary
           </h2>
         </div>
         <p className="text-muted-foreground">
-          Select a language and search the medical glossary.
+          Adjust settings and search the medical glossary.
         </p>
       </header>
-
-      {/* Language Selection */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-          <Languages className="w-4 h-4" />
-          Chat Language
-        </label>
-        <Select value={selectedLanguage} onValueChange={onLanguageChange}>
-          <SelectTrigger className="w-full shadow-md bg-white dark:bg-black/20">
-            <SelectValue placeholder="Language" />
-          </SelectTrigger>
-          <SelectContent>
-            {languages.map((lang) => (
-              <SelectItem key={lang.value} value={lang.value}>
-                {lang.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      
+      {/* Theme and Language Settings */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Language Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+            <Languages className="w-4 h-4" />
+            Chat Language
+          </label>
+          <Select value={selectedLanguage} onValueChange={onLanguageChange}>
+            <SelectTrigger className="w-full shadow-md bg-white dark:bg-black/20">
+              <SelectValue placeholder="Language" />
+            </SelectTrigger>
+            <SelectContent>
+              {languages.map((lang) => (
+                <SelectItem key={lang.value} value={lang.value}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* Theme Toggle */}
+        <div className="space-y-2">
+           <label className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+            {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            Theme
+          </label>
+           <div className="flex items-center justify-between rounded-lg border p-3 shadow-md bg-white dark:bg-black/20">
+            <Label htmlFor="dark-mode" className="text-sm">
+              {theme === "dark" ? "Dark Mode" : "Light Mode"}
+            </Label>
+            <Switch
+                id="dark-mode"
+                checked={theme === 'dark'}
+                onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              />
+          </div>
+        </div>
       </div>
+
 
       {/* Glossary */}
       <div className="flex-1 flex flex-col min-h-0">

@@ -5,19 +5,25 @@
  *
  * - intelligentMedicalChat - A function that handles medical questions and provides answers based on the Gale Encyclopedia.
  * - IntelligentMedicalChatInput - The input type for the intelligentMedicalChat function.
- * - IntelligentMedicalChatOutput - The return type for the intelligentMedicalChat function.
+ * - IntelligentMedicalChatOutput - The return type for the intelligentMedical-chat function.
  */
 
 import {ai} from '@/ai/genkit';
+import {Message, Role} from 'genkit';
 import {z} from 'genkit';
 
 const IntelligentMedicalChatInputSchema = z.object({
   question: z.string().describe('The medical question asked by the user.'),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string(),
+  })).describe('The previous messages in the conversation.'),
 });
 export type IntelligentMedicalChatInput = z.infer<typeof IntelligentMedicalChatInputSchema>;
 
 const IntelligentMedicalChatOutputSchema = z.object({
-  answer: z.string().describe('The answer to the medical question based on the Gale Encyclopedia.'),
+  summary: z.string().describe('A short, one or two sentence summary of the answer.'),
+  answer: z.string().describe('The detailed answer to the medical question based on the Gale Encyclopedia.'),
 });
 export type IntelligentMedicalChatOutput = z.infer<typeof IntelligentMedicalChatOutputSchema>;
 
@@ -29,9 +35,18 @@ const prompt = ai.definePrompt({
   name: 'intelligentMedicalChatPrompt',
   input: {schema: IntelligentMedicalChatInputSchema},
   output: {schema: IntelligentMedicalChatOutputSchema},
-  prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia. 
+  prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia. Use the provided conversation history to understand the context of the user's question.
 
-Question: {{{question}}}`,
+First, provide a short, one or two sentence summary of the answer. Then, provide the full, detailed answer.
+
+{{#if history}}
+Conversation History:
+{{#each history}}
+{{role}}: {{{content}}}
+{{/each}}
+{{/if}}
+
+Current Question: {{{question}}}`,
 });
 
 const intelligentMedicalChatFlow = ai.defineFlow(
@@ -41,7 +56,9 @@ const intelligentMedicalChatFlow = ai.defineFlow(
     outputSchema: IntelligentMedicalChatOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const history = input.history.map(m => new Message({role: m.role as Role, content: [{text: m.content}]}));
+
+    const {output} = await prompt({...input, history});
     return output!;
   }
 );
