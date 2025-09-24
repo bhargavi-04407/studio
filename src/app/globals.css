@@ -19,6 +19,9 @@ body {
 
     --primary: 170 80% 30%;
     --primary-foreground: 0 0% 100%;
+    
+    --navy-blue: 240 100% 25%;
+    --navy-blue-foreground: 0 0% 100%;
 
     --secondary: 25 95% 61%;
     --secondary-foreground: 0 0% 100%;
@@ -54,6 +57,10 @@ body {
     --popover-foreground: 210 40% 98%;
     --primary: 170 80% 40%;
     --primary-foreground: 0 0% 100%;
+    
+    --navy-blue: 240 100% 35%;
+    --navy-blue-foreground: 0 0% 100%;
+    
     --secondary: 25 95% 61%;
     --secondary-foreground: 0 0% 100%;
     --muted: 217.2 32.6% 17.5%;
