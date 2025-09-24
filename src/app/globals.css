@@ -9,10 +9,10 @@ body {
 @layer base {
   :root {
     --background: 230 40% 98%;
-    --foreground: 217 91% 60%; /* Blue */
+    --foreground: 240 10% 3.9%; /* Black */
 
     --card: 230 40% 96%;
-    --card-foreground: 217 91% 60%; /* Blue */
+    --card-foreground: 240 10% 3.9%; /* Black */
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
@@ -47,9 +47,9 @@ body {
 
   .dark {
     --background: 170 40% 10%;
-    --foreground: 217 91% 60%; /* Blue */
+    --foreground: 210 40% 98%; /* White */
     --card: 170 40% 12%;
-    --card-foreground: 217 91% 60%; /* Blue */
+    --card-foreground: 210 40% 98%; /* White */
     --popover: 170 40% 10%;
     --popover-foreground: 210 40% 98%;
     --primary: 170 80% 40%;
