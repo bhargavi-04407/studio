@@ -19,7 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Send, ThumbsUp, ThumbsDown, Book, Search, Mic, LogOut } from "lucide-react";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { askQuestion } from "@/app/actions";
@@ -60,7 +60,6 @@ interface ChatInterfaceProps {
   selectedLanguage: string;
   chatSession: ChatSession | null;
   onHistoryUpdate: (chatId?: string) => void;
-  key: string;
 }
 
 function UserAvatar() {
