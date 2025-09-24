@@ -260,11 +260,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
       const isNewChat = !currentChatId;
       if (result.chatId) {
         setCurrentChatId(result.chatId);
-        if (isNewChat) {
-          onHistoryUpdate(result.chatId);
-        } else {
-          onHistoryUpdate();
-        }
+        onHistoryUpdate(result.chatId);
       }
     } else {
       toast({
