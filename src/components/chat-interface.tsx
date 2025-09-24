@@ -94,7 +94,6 @@ export function ChatInterface() {
     setMessages((prev) => [...prev, userMessage]);
     form.reset();
     
-    // Add a temporary "typing" message
     const typingMessageId = String(Date.now() + 1);
     const typingMessage: Message = {
       id: typingMessageId,
@@ -127,15 +126,15 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-        <header className="p-4 border-b flex items-center justify-between bg-card shadow-sm">
+    <div className="flex flex-col h-full bg-card text-card-foreground">
+        <header className="p-4 border-b flex items-center justify-between bg-card shadow-md z-10">
             <div>
                 <h1 className="text-2xl font-bold font-headline text-primary">Intelligent Medical Chat</h1>
                 <p className="text-muted-foreground">Ask medical questions and get answers from Gale Encyclopedia.</p>
             </div>
             <div className="w-48">
                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <SelectTrigger className="shadow-sm">
+                <SelectTrigger className="shadow-md">
                     <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,7 +150,7 @@ export function ChatInterface() {
 
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
-          <div className="space-y-6">
+          <div className="space-y-8">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -161,7 +160,7 @@ export function ChatInterface() {
                 )}
               >
                 {message.role === "assistant" && (
-                  <Avatar className="w-10 h-10 border-2 border-primary shadow-sm">
+                  <Avatar className="w-10 h-10 border-2 border-primary shadow-lg">
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       <Bot className="w-6 h-6" />
                     </AvatarFallback>
@@ -169,16 +168,16 @@ export function ChatInterface() {
                 )}
                 <div
                   className={cn(
-                    "max-w-xl rounded-xl p-4 text-base shadow-md space-y-4",
+                    "max-w-2xl rounded-2xl p-4 text-base shadow-lg space-y-4 transition-all duration-300",
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card"
+                      ? "bg-primary text-primary-foreground rounded-br-none"
+                      : "bg-card text-card-foreground rounded-bl-none border"
                   )}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
                 </div>
                 {message.role === "user" && (
-                   <Avatar className="w-10 h-10 border-2 border-primary shadow-sm">
+                   <Avatar className="w-10 h-10 border-2 border-primary shadow-lg">
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       <User className="w-6 h-6" />
                     </AvatarFallback>
@@ -190,7 +189,7 @@ export function ChatInterface() {
         </ScrollArea>
       </div>
 
-      <div className="p-4 border-t bg-card shadow-t-sm">
+      <div className="p-4 border-t bg-card shadow-t-lg">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-4">
             <FormField
@@ -211,7 +210,7 @@ export function ChatInterface() {
                 </FormItem>
               )}
             />
-            <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-12 h-12 shadow-sm">
+            <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-12 h-12 shadow-md hover:shadow-lg transition-shadow">
               <Send className="w-6 h-6" />
               <span className="sr-only">Send</span>
             </Button>

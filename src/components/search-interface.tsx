@@ -38,7 +38,7 @@ export function SearchInterface({ terms }: SearchInterfaceProps) {
         <Input
           type="search"
           placeholder="Search for a medical term..."
-          className="pl-12 py-6 rounded-full text-base shadow-sm"
+          className="pl-12 py-6 rounded-full text-base shadow-inner"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -48,12 +48,12 @@ export function SearchInterface({ terms }: SearchInterfaceProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-4">
           {filteredTerms.length > 0 ? (
             filteredTerms.map((term) => (
-              <Card key={term.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-xl overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="font-headline text-primary">{term.term}</CardTitle>
+              <Card key={term.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden group">
+                <CardHeader className="bg-primary/5">
+                  <CardTitle className="font-headline text-primary group-hover:text-primary/90 transition-colors">{term.term}</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col gap-4">
-                  <CardDescription className="text-base">{term.definition}</CardDescription>
+                <CardContent className="flex-1 flex flex-col gap-4 p-6">
+                  <CardDescription className="text-base text-card-foreground/80">{term.definition}</CardDescription>
                 </CardContent>
               </Card>
             ))
