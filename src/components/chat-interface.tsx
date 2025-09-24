@@ -274,7 +274,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
   }
 
   return (
-    <div className="flex flex-col h-full bg-black text-white">
+    <div className="flex flex-col h-full bg-background">
       <div className="flex-1 overflow-hidden p-6">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="space-y-8 max-w-4xl mx-auto">
@@ -296,11 +296,11 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                 <div className={cn("flex flex-col gap-2 max-w-2xl", message.role === 'user' && 'items-end')}>
                   <div
                     className={cn(
-                      "rounded-2xl p-4 text-base shadow-lg space-y-2 transition-all duration-300 text-[hsl(var(--accent))] dark:text-[hsl(var(--accent))]",
+                      "rounded-2xl p-4 text-base shadow-lg space-y-2 transition-all duration-300",
                        message.isTyping && "animate-pulse",
                       message.role === "user"
-                        ? "bg-blue-100 rounded-br-none"
-                        : "bg-white rounded-bl-none border border-black/5"
+                        ? "bg-[hsl(var(--user-bubble))] text-[hsl(var(--user-bubble-foreground))] rounded-br-none"
+                        : "bg-[hsl(var(--assistant-bubble))] text-[hsl(var(--assistant-bubble-foreground))] rounded-bl-none border border-black/5"
                     )}
                   >
                     {message.role === 'assistant' ? (
@@ -314,7 +314,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-green-100 hover:text-green-600">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-green-100 hover:text-green-600">
                               <ThumbsUp className="w-4 h-4" />
                             </Button>
                           </TooltipTrigger>
@@ -322,7 +322,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-red-100 hover:text-red-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-red-100 hover:text-red-600">
                                 <ThumbsDown className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
@@ -330,15 +330,15 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-blue-100 hover:text-blue-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-blue-100 hover:text-blue-600">
                                 <Book className="w-4 h-4" />
-                              </Button>
+                              </Button>                          
                           </TooltipTrigger>
                           <TooltipContent>View in glossary</TooltipContent>
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-yellow-100 hover:text-yellow-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-yellow-100 hover:text-yellow-600">
                                 <Search className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
@@ -349,11 +349,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                   )}
                 </div>
                 {message.role === "user" && (
-                  <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
-                    <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-                      <span>🙂</span>
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar />
                 )}
               </div>
             ))}
@@ -377,12 +373,12 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         autoComplete="off"
                         {...field}
                         disabled={isSubmitting}
-                        className="text-base py-6 rounded-full px-14 shadow-inner bg-white dark:bg-black/20 text-black focus-visible:ring-primary/50"
+                        className="text-base py-6 rounded-full px-14 shadow-inner bg-background/80 dark:bg-black/20 focus-visible:ring-primary/50"
                       />
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button type="button" size="icon" onClick={handleVoiceSearch} disabled={isSubmitting} className={cn("rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute left-2 top-1/2 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white", isListening && "bg-red-500 hover:bg-red-600")}>
+                             <Button type="button" size="icon" onClick={handleVoiceSearch} disabled={isSubmitting} className={cn("rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute left-2 top-1/2 -translate-y-1/2 bg-[hsl(var(--navy-blue))] hover:bg-[hsl(var(--navy-blue))]/90 text-[hsl(var(--navy-blue-foreground))]", isListening && "bg-red-500 hover:bg-red-600")}>
                                 <Mic className="w-5 h-5" />
                                 <span className="sr-only">Voice Search</span>
                               </Button>
@@ -391,7 +387,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                       </TooltipProvider>
 
-                      <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute right-2 top-1/2 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white">
+                      <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute right-2 top-1/2 -translate-y-1/2 bg-[hsl(var(--navy-blue))] hover:bg-[hsl(var(--navy-blue))]/90 text-[hsl(var(--navy-blue-foreground))]">
                         <Send className="w-5 h-5" />
                         <span className="sr-only">Send</span>
                       </Button>
