@@ -66,7 +66,7 @@ const multiLanguageSupportFlow = ai.defineFlow(
     const translatedToEnglish = await translateText(query, 'en');
 
     // Simulate fetching medical information from the Gale Encyclopedia (replace with actual Gale Encyclopedia integration)
-    const galeEncyclopediaResponse = `This is a placeholder response from the Gale Encyclopedia for the query: ${translatedToEnglish}.  The user\'s original query was: ${query} in ${sourceLanguage}.`;
+    const galeEncyclopediaResponse = `This is a placeholder response from all volumes of the Gale Encyclopedia for the query: ${translatedToEnglish}.  The user\'s original query was: ${query} in ${sourceLanguage}.`;
 
     // Translate the Gale Encyclopedia response back to the target language
     const translatedResponse = await translateText(galeEncyclopediaResponse, targetLanguage);

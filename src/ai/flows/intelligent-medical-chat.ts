@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   name: 'intelligentMedicalChatPrompt',
   input: {schema: IntelligentMedicalChatInputSchema},
   output: {schema: IntelligentMedicalChatOutputSchema},
-  prompt: `You are a medical expert with access to the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia.\n\nQuestion: {{{question}}}`,
+  prompt: `You are a medical expert with access to all volumes of the Gale Encyclopedia. Please answer the following medical question based on the information in the Gale Encyclopedia.\n\nQuestion: {{{question}}}`,
 });
 
 const intelligentMedicalChatFlow = ai.defineFlow(

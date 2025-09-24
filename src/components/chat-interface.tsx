@@ -47,6 +47,12 @@ const languages = [
   { value: "fr", label: "French" },
   { value: "de", label: "German" },
   { value: "ja", label: "Japanese" },
+  { value: "hi", label: "Hindi" },
+  { value: "kn", label: "Kannada" },
+  { value: "mr", label: "Marathi" },
+  { value: "ml", label: "Malayalam" },
+  { value: "ta", label: "Tamil" },
+  { value: "te", label: "Telugu" },
 ];
 
 export function ChatInterface() {
