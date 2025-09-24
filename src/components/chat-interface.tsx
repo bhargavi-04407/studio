@@ -287,7 +287,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                 )}
               >
                 {message.role === "assistant" && (
-                  <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
+                  <Avatar className={cn("w-10 h-10 border-2 border-primary/50 shadow-lg bg-background", message.isTyping && "animate-pulse")}>
                     <AvatarFallback className="bg-primary/20 text-primary">
                       <Bot className="w-6 h-6" />
                     </AvatarFallback>
