@@ -104,7 +104,7 @@ function UserAvatar() {
   );
 }
 
-const AssistantMessage = ({ content }: { content: string }) => {
+const AssistantMessage = ({ content, languageCode }: { content: string, languageCode: string }) => {
   const { toast } = useToast();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -122,7 +122,7 @@ const AssistantMessage = ({ content }: { content: string }) => {
     }
     
     setIsSpeaking(true);
-    const result = await getSpeech({ text });
+    const result = await getSpeech({ text, languageCode });
     if (result.success && result.audio) {
       const audio = new Audio(result.audio);
       audioRef.current = audio;
@@ -314,7 +314,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
     const result = await askQuestion({
       question: values.message,
       language: selectedLanguage,
-      messages: [...currentMessages, userMessage],
+      messages: currentMessages, // Pass only the history before the new user message
       chatId: currentChatId
     });
     
@@ -328,10 +328,11 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
       };
       setMessages((prev) => [...prev.filter(m => m.id !== userMessage.id), userMessage, assistantMessage]);
       
-      if (result.chatId) {
+      if (result.chatId && result.chatId !== currentChatId) {
         setCurrentChatId(result.chatId);
-        onHistoryUpdate(result.chatId);
       }
+      onHistoryUpdate(result.chatId);
+
     } else {
       toast({
         variant: "destructive",
@@ -374,7 +375,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
                     )}
                   >
                     {message.role === 'assistant' ? (
-                      <AssistantMessage content={message.content} />
+                      <AssistantMessage content={message.content} languageCode={selectedLanguage} />
                     ) : (
                       <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
                     )}

@@ -24,13 +24,15 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     const userId = auth.currentUser?.uid;
 
     let answer: string;
+    let summary: string;
     
     // Filter out the system message before sending to AI
     const historyForAI = messages.filter(m => m.role !== 'system');
 
     if (language === "en") {
       const response = await intelligentMedicalChat({ question, history: historyForAI });
-      answer = `**Summary:** ${response.summary}\n\n**Details:** ${response.answer}`;
+      summary = response.summary;
+      answer = response.answer;
     } else {
       const response = await translateQuery({
         query: question,
@@ -38,26 +40,28 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
         targetLanguage: language,
         history: historyForAI,
       });
-      answer = `**Summary:** ${response.summary}\n\n**Details:** ${response.translatedResponse}`;
+      summary = response.summary;
+      answer = response.translatedResponse;
     }
+    
+    const finalAnswer = `**Summary:** ${summary}\n\n**Details:** ${answer}`;
     
     let newChatId = chatId;
     if (userId) {
-        // Form the complete message history for saving
-        const finalMessages = [...messages, { role: 'user' as const, content: question }, { role: 'assistant' as const, content: answer }]
-            .filter(m => m.role !== 'system') 
-            .map(m => ({role: m.role as 'user' | 'assistant', content: m.content}));
-        
-        const saveResult = await saveChatSession({ userId, messages: finalMessages, chatId: newChatId });
+      const finalMessages = [...messages, { role: 'user' as const, content: question }, { role: 'assistant' as const, content: finalAnswer }]
+        .filter(m => m.role !== 'system')
+        .map(m => ({role: m.role as 'user' | 'assistant', content: m.content}));
 
-        if (saveResult.success && saveResult.chatId) {
-            newChatId = saveResult.chatId;
-        } else if (!saveResult.success) {
-          console.error("Failed to save chat session:", saveResult.error);
-        }
+      const saveResult = await saveChatSession({ userId, messages: finalMessages, chatId: newChatId });
+
+      if (saveResult.success && saveResult.chatId) {
+          newChatId = saveResult.chatId;
+      } else if (!saveResult.success) {
+        console.error("Failed to save chat session:", saveResult.error);
+      }
     }
 
-    return { success: true, answer, chatId: newChatId };
+    return { success: true, answer: finalAnswer, chatId: newChatId };
   } catch (error) {
     console.error("Critical error in askQuestion:", error);
     if (error instanceof z.ZodError) {
@@ -70,12 +74,13 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
 
 const GetSpeechInput = z.object({
   text: z.string(),
+  languageCode: z.string().optional(),
 });
 
 export async function getSpeech(input: z.infer<typeof GetSpeechInput>) {
     try {
-        const { text } = GetSpeechInput.parse(input);
-        const { audio } = await textToSpeech({ text });
+        const { text, languageCode } = GetSpeechInput.parse(input);
+        const { audio } = await textToSpeech({ text, languageCode });
         return { success: true, audio };
     } catch (error) {
         console.error("Error in getSpeech:", error);

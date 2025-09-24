@@ -15,6 +15,7 @@ import wav from 'wav';
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to be converted to speech.'),
+  languageCode: z.string().optional().describe('The BCP-47 language code for the speech.'),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
@@ -68,6 +69,7 @@ const textToSpeechFlow = ai.defineFlow(
         speechConfig: {
           voiceConfig: {
             prebuiltVoiceConfig: {voiceName: 'Algenib'},
+            languageCode: input.languageCode,
           },
         },
       },
