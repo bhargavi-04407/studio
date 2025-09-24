@@ -35,26 +35,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-
-      const isProtectedRoute = protectedRoutes.includes(pathname);
-      const isPublicRoute = publicRoutes.includes(pathname);
-
-      if (!user && isProtectedRoute) {
-        router.push("/welcome");
-      }
-      if (user && (isPublicRoute && pathname !== '/')) {
-        router.push("/");
-      }
     });
 
     return () => unsubscribe();
-  }, [router, pathname]);
+  }, []);
   
   useEffect(() => {
-    if(!loading && !user && !publicRoutes.includes(pathname)) {
+    if (loading) return;
+
+    const isProtectedRoute = protectedRoutes.includes(pathname);
+    const isPublicRoute = publicRoutes.includes(pathname);
+
+    if (!user && isProtectedRoute) {
         router.push('/welcome');
     }
-  }, [loading, user, pathname, router]);
+    
+    if (user && isPublicRoute) {
+        router.push('/');
+    }
+
+  }, [user, loading, pathname, router]);
 
   const value = { user, loading };
 
