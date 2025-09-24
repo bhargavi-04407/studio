@@ -17,10 +17,10 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
 
-    --primary: 170 80% 30%;
+    --primary: 200 100% 50%; /* Sky Blue */
     --primary-foreground: 0 0% 100%;
     
-    --navy-blue: 240 100% 25%;
+    --navy-blue: 200 100% 50%; /* Sky Blue for buttons */
     --navy-blue-foreground: 0 0% 100%;
 
     --secondary: 25 95% 61%;
@@ -29,7 +29,7 @@ body {
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 170 70% 40%;
+    --accent: 200 100% 50%; /* Sky Blue */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -37,56 +37,56 @@ body {
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 170 80% 30%;
+    --ring: 200 100% 50%; /* Sky Blue */
 
-    --background-start-rgb: 230, 242, 241; /* Muted teal #E6F2F1 - ocean green light */
-    --background-end-rgb: 179, 229, 252; /* Light Blue #B3E5FC - representing sky */
+    --background-start-rgb: 230, 242, 241;
+    --background-end-rgb: 179, 229, 252;
 
-    --user-bubble: 200 100% 95%; /* Pale Blue in HSL */
+    --user-bubble: 200 100% 95%;
     --user-bubble-foreground: 240 10% 3.9%;
-    --assistant-bubble: 170 50% 95%; /* Light Ocean Green */
+    --assistant-bubble: 220 50% 95%;
     --assistant-bubble-foreground: 240 10% 3.9%;
   }
 
   .dark {
-    --background: 170 40% 5%;
+    --background: 240 5% 5%; /* Near Black */
     --foreground: 210 40% 98%; /* White */
     
-    --card: 170 40% 10%;
+    --card: 240 5% 10%;
     --card-foreground: 210 40% 98%; /* White */
     
-    --popover: 170 40% 5%;
+    --popover: 240 5% 5%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 170 80% 40%;
+    --primary: 200 100% 50%; /* Sky Blue */
     --primary-foreground: 0 0% 100%;
     
-    --navy-blue: 240 100% 35%;
+    --navy-blue: 200 100% 50%; /* Sky Blue for buttons */
     --navy-blue-foreground: 0 0% 100%;
     
     --secondary: 25 95% 61%;
     --secondary-foreground: 0 0% 100%;
     
-    --muted: 170 30% 15%;
+    --muted: 240 5% 15%;
     --muted-foreground: 215 20.2% 65.1%;
     
-    --accent: 170 70% 50%;
+    --accent: 200 100% 50%; /* Sky Blue */
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     
-    --border: 170 30% 20%;
-    --input: 170 30% 20%;
-    --ring: 170 80% 40%;
+    --border: 200 100% 30%; /* Sky Blue border */
+    --input: 240 5% 12%;
+    --ring: 200 100% 50%; /* Sky Blue */
     --radius: 0.75rem;
 
-    --background-start-rgb: 10, 25, 30; /* Dark Ocean Green */
-    --background-end-rgb: 10, 14, 20;
+    --background-start-rgb: 10, 10, 10;
+    --background-end-rgb: 0, 0, 0;
 
-    --user-bubble: 220 50% 18%;
+    --user-bubble: 200 90% 15%;
     --user-bubble-foreground: 210 40% 98%;
-    --assistant-bubble: 170 40% 15%;
+    --assistant-bubble: 240 5% 15%;
     --assistant-bubble-foreground: 210 40% 98%;
   }
 }
@@ -105,6 +105,6 @@ body {
     text-shadow: 1px 1px 2px theme('colors.gray.300');
   }
   .dark .text-shadow-sm {
-    text-shadow: 1px 1px 2px theme('colors.black / 50%');
+    text-shadow: 1px 1px 3px hsl(var(--primary) / 0.5);
   }
 }

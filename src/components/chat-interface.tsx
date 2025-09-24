@@ -88,7 +88,7 @@ function UserAvatar() {
           {user?.photoURL ? (
             <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
           ) : (
-            <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+            <AvatarFallback className="bg-transparent text-2xl">
               <span>👤</span>
             </AvatarFallback>
           )}
@@ -330,7 +330,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-primary/10 hover:text-primary">
                                 <Book className="w-4 h-4" />
                               </Button>                          
                           </TooltipTrigger>
@@ -338,7 +338,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-yellow-100 dark:hover:bg-yellow-900/50 hover:text-yellow-600 dark:hover:text-yellow-400">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:bg-primary/10 hover:text-primary">
                                 <Search className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
