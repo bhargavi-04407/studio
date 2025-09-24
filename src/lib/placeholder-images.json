@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "influenza",
+      "description": "A microscopic view of the influenza virus.",
+      "imageUrl": "https://images.unsplash.com/photo-1659034637688-5f67d1c6b8e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8dmlydXMlMjBjZWxsc3xlbnwwfHx8fDE3NTg3MTgxMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "virus cells"
+    },
+    {
+      "id": "heart-attack",
+      "description": "An illustration of a heart during a myocardial infarction.",
+      "imageUrl": "https://images.unsplash.com/photo-1715111183948-ee02f78b9175?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxodW1hbiUyMGhlYXJ0fGVufDB8fHx8MTc1ODcxODEyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "human heart"
+    },
+    {
+      "id": "diabetes",
+      "description": "A person checking their blood sugar level.",
+      "imageUrl": "https://images.unsplash.com/photo-1542884841-9f546e727bca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxibG9vZCUyMHRlc3R8ZW58MHx8fHwxNzU4NzE4MTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "blood test"
+    },
+    {
+      "id": "asthma",
+      "description": "An illustration showing asthmatic airways compared to normal airways.",
+      "imageUrl": "https://images.unsplash.com/photo-1715529282082-87e4334283e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxodW1hbiUyMGx1bmdzfGVufDB8fHx8MTc1ODcxODEyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "human lungs"
+    },
+    {
+      "id": "appendicitis",
+      "description": "An illustration showing an inflamed appendix.",
+      "imageUrl": "https://images.unsplash.com/photo-1530026454774-50cce722a1fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxodW1hbiUyMGFuYXRvbXl8ZW58MHx8fHwxNzU4NzE4MTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "human anatomy"
+    }
+  ]
 }
