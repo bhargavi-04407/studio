@@ -15,20 +15,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Bot, Send, User } from "lucide-react";
+import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { askQuestion } from "@/app/actions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+
 
 const chatFormSchema = z.object({
   message: z.string().min(1, "Message cannot be empty"),
@@ -38,21 +38,8 @@ type Message = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
+  isTyping?: boolean;
 };
-
-const languages = [
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "ja", label: "Japanese" },
-  { value: "hi", label: "Hindi" },
-  { value: "kn", label: "Kannada" },
-  { value: "mr", label: "Marathi" },
-  { value: "ml", label: "Malayalam" },
-  { value: "ta", label: "Tamil" },
-  { value: "te", label: "Telugu" },
-];
 
 export function ChatInterface() {
   const { toast } = useToast();
@@ -65,7 +52,6 @@ export function ChatInterface() {
     },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof chatFormSchema>>({
@@ -76,12 +62,14 @@ export function ChatInterface() {
   });
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
+    setTimeout(() => {
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTo({
+          top: scrollAreaRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }, 100)
   }, [messages]);
 
   async function onSubmit(values: z.infer<typeof chatFormSchema>) {
@@ -91,94 +79,115 @@ export function ChatInterface() {
       role: "user",
       content: values.message,
     };
-    setMessages((prev) => [...prev, userMessage]);
+    
+    const typingMessage: Message = {
+      id: String(Date.now() + 1),
+      role: 'assistant',
+      content: '...',
+      isTyping: true
+    };
+
+    setMessages((prev) => [...prev, userMessage, typingMessage]);
     form.reset();
     
-    const typingMessageId = String(Date.now() + 1);
-    const typingMessage: Message = {
-      id: typingMessageId,
-      role: 'assistant',
-      content: '...'
-    };
-    setMessages((prev) => [...prev, typingMessage]);
-
+    // We get the language from the InfoPanel, but since we don't have cross-component state, we'll hardcode 'en' for now
     const result = await askQuestion({
       question: values.message,
-      language: selectedLanguage,
+      language: "en",
     });
 
     if (result.success && result.answer) {
       const assistantMessage: Message = {
-        id: String(Date.now() + 2),
+        id: typingMessage.id, // Replace typing message
         role: "assistant",
         content: result.answer,
       };
-      setMessages((prev) => prev.map(m => m.id === typingMessageId ? assistantMessage : m));
+      setMessages((prev) => prev.map(m => m.id === typingMessage.id ? assistantMessage : m));
     } else {
       toast({
         variant: "destructive",
         title: "Error",
         description: result.error,
       });
-       setMessages((prev) => prev.filter(m => m.id !== typingMessageId));
+       setMessages((prev) => prev.filter(m => m.id !== typingMessage.id));
     }
     setIsSubmitting(false);
   }
 
   return (
-    <div className="flex flex-col h-full bg-card text-card-foreground">
-        <header className="p-4 border-b flex items-center justify-between bg-card shadow-md z-10">
-            <div>
-                <h1 className="text-2xl font-bold font-headline text-primary">Intelligent Medical Chat</h1>
-                <p className="text-muted-foreground">Ask medical questions and get answers from Gale Encyclopedia.</p>
-            </div>
-            <div className="w-48">
-                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <SelectTrigger className="shadow-md">
-                    <SelectValue placeholder="Language" />
-                </SelectTrigger>
-                <SelectContent>
-                    {languages.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-                </Select>
-            </div>
-        </header>
-
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
-          <div className="space-y-8">
+    <div className="flex flex-col h-full bg-transparent text-foreground">
+      <div className="flex-1 overflow-hidden p-6">
+        <ScrollArea className="h-full" ref={scrollAreaRef}>
+          <div className="space-y-8 max-w-4xl mx-auto">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={cn(
-                  "flex items-start gap-4",
-                  message.role === "user" && "justify-end"
+                  "flex items-start gap-4 animate-in fade-in duration-500",
+                  message.role === "user" ? "justify-end" : "justify-start"
                 )}
               >
                 {message.role === "assistant" && (
-                  <Avatar className="w-10 h-10 border-2 border-primary shadow-lg">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                  <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
+                    <AvatarFallback className="bg-primary/20 text-primary">
                       <Bot className="w-6 h-6" />
                     </AvatarFallback>
                   </Avatar>
                 )}
-                <div
-                  className={cn(
-                    "max-w-2xl rounded-2xl p-4 text-base shadow-lg space-y-4 transition-all duration-300",
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-none"
-                      : "bg-card text-card-foreground rounded-bl-none border"
+                <div className={cn("flex flex-col gap-2 max-w-2xl", message.role === 'user' && 'items-end')}>
+                  <div
+                    className={cn(
+                      "rounded-2xl p-4 text-base shadow-lg space-y-2 transition-all duration-300",
+                       message.isTyping && "animate-pulse",
+                      message.role === "user"
+                        ? "bg-[--user-bubble] text-[--user-bubble-foreground] rounded-br-none"
+                        : "bg-[--assistant-bubble] text-[--assistant-bubble-foreground] rounded-bl-none border border-black/5"
+                    )}
+                  >
+                    <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  </div>
+                  {message.role === 'assistant' && !message.isTyping && (
+                    <div className="flex items-center gap-2">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-green-100 hover:text-green-600">
+                              <ThumbsUp className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Good response</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-red-100 hover:text-red-600">
+                                <ThumbsDown className="w-4 h-4" />
+                              </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Bad response</TooltipContent>
+                        </Tooltip>
+                         <Tooltip>
+                          <TooltipTrigger asChild>
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-blue-100 hover:text-blue-600">
+                                <Book className="w-4 h-4" />
+                              </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>View in glossary</TooltipContent>
+                        </Tooltip>
+                         <Tooltip>
+                          <TooltipTrigger asChild>
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-yellow-100 hover:text-yellow-600">
+                                <Search className="w-4 h-4" />
+                              </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>View sources</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                   )}
-                >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
                 </div>
                 {message.role === "user" && (
-                   <Avatar className="w-10 h-10 border-2 border-primary shadow-lg">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                   <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
+                    <AvatarFallback className="bg-primary/20 text-primary">
                       <User className="w-6 h-6" />
                     </AvatarFallback>
                   </Avatar>
@@ -189,7 +198,7 @@ export function ChatInterface() {
         </ScrollArea>
       </div>
 
-      <div className="p-4 border-t bg-card shadow-t-lg">
+      <div className="p-4 border-t bg-transparent max-w-4xl mx-auto w-full">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-4">
             <FormField
@@ -198,22 +207,24 @@ export function ChatInterface() {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input
-                      placeholder="Type your medical question here..."
-                      autoComplete="off"
-                      {...field}
-                      disabled={isSubmitting}
-                      className="text-base py-6 rounded-full px-6 shadow-inner"
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="Ask a medical question..."
+                        autoComplete="off"
+                        {...field}
+                        disabled={isSubmitting}
+                        className="text-base py-6 rounded-full px-6 shadow-inner bg-white dark:bg-black/20 focus-visible:ring-primary/50"
+                      />
+                      <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute right-2 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary/90">
+                        <Send className="w-5 h-5" />
+                        <span className="sr-only">Send</span>
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-12 h-12 shadow-md hover:shadow-lg transition-shadow">
-              <Send className="w-6 h-6" />
-              <span className="sr-only">Send</span>
-            </Button>
           </form>
         </Form>
       </div>
