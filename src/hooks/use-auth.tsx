@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -22,7 +23,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 const protectedRoutes = ["/"];
-const publicRoutes = ["/login", "/signup"];
+const publicRoutes = ["/login", "/signup", "/welcome"];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -35,16 +36,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user);
       setLoading(false);
 
-      if (!user && protectedRoutes.includes(pathname)) {
-        router.push("/login");
+      const isProtectedRoute = protectedRoutes.includes(pathname);
+      const isPublicRoute = publicRoutes.includes(pathname);
+
+      if (!user && isProtectedRoute) {
+        router.push("/welcome");
       }
-      if (user && publicRoutes.includes(pathname)) {
+      if (user && (isPublicRoute && pathname !== '/')) {
         router.push("/");
       }
     });
 
     return () => unsubscribe();
   }, [router, pathname]);
+  
+  useEffect(() => {
+    if(!loading && !user && !publicRoutes.includes(pathname)) {
+        router.push('/welcome');
+    }
+  }, [loading, user, pathname, router]);
 
   const value = { user, loading };
 

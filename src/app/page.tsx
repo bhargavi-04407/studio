@@ -32,8 +32,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
-    } else {
+      router.push('/welcome');
+    } else if (user) {
       fetchHistory();
     }
   }, [user, loading, router, fetchHistory]);
