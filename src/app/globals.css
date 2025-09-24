@@ -8,25 +8,25 @@ body {
 
 @layer base {
   :root {
-    --background: 210 20% 98%; /* Soft Ivory tint */
-    --foreground: 240 10% 3.9%; /* Dark Gray */
+    --background: 30 50% 98%;
+    --foreground: 240 10% 3.9%;
 
-    --card: 210 20% 96%;
+    --card: 30 50% 96%;
     --card-foreground: 240 10% 3.9%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 211 78% 43%; /* Medical Blue #1565C0 */
+    --primary: 160 100% 24%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 17 95% 61%; /* Warm Coral #FF7043 */
+    --secondary: 25 95% 61%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 38 92% 50%; /* Amber #FFC107 */
+    --accent: 45 92% 55%;
     --accent-foreground: 240 10% 3.9%;
 
     --destructive: 0 84.2% 60.2%;
@@ -34,16 +34,16 @@ body {
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 211 78% 43%;
+    --ring: 160 100% 24%;
 
     --radius: 0.75rem;
 
-    --background-start-rgb: 230, 242, 241; /* Muted Teal #E6F2F1 */
-    --background-end-rgb: 249, 249, 246; /* Soft Ivory #F9F9F6 */
+    --background-start-rgb: 150, 242, 221;
+    --background-end-rgb: 249, 249, 246;
 
-    --user-bubble: 200 100% 97%; /* Pale Green #E8F5E9 */
+    --user-bubble: 130 100% 97%;
     --user-bubble-foreground: 240 10% 3.9%;
-    --assistant-bubble: 212 92% 94%; /* Light Blue #E3F2FD */
+    --assistant-bubble: 200 92% 94%;
     --assistant-bubble-foreground: 240 10% 3.9%;
   }
 
@@ -54,19 +54,19 @@ body {
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 211 78% 43%;
+    --primary: 160 100% 34%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 17 95% 61%;
+    --secondary: 25 95% 61%;
     --secondary-foreground: 0 0% 100%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 38 92% 50%;
+    --accent: 45 92% 55%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 211 78% 43%;
+    --ring: 160 100% 34%;
     --radius: 0.75rem;
 
     --background-start-rgb: 222, 84%, 4.9%;
