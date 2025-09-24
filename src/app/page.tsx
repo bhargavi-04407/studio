@@ -20,6 +20,7 @@ export default function Home() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [selectedChat, setSelectedChat] = useState<ChatSession | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [historyKey, setHistoryKey] = useState(Date.now()); // Used to force re-fetch
 
   const fetchHistory = useCallback(async () => {
     if (user) {
@@ -38,7 +39,7 @@ export default function Home() {
     } else if (user) {
       fetchHistory();
     }
-  }, [user, loading, router, fetchHistory]);
+  }, [user, loading, router, fetchHistory, historyKey]);
   
   const handleHistoryUpdate = useCallback(async (newChatId?: string) => {
     const updatedHistory = await fetchHistory();

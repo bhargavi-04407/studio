@@ -31,16 +31,14 @@ export async function saveChatSession(input: ChatSessionInput) {
     }
     
     try {
-        let currentChatId = chatId;
-        
-        if (currentChatId) {
+        if (chatId) {
             // A chat already exists, update it with the new messages
-            const docRef = doc(db, 'chatSessions', currentChatId);
+            const docRef = doc(db, 'chatSessions', chatId);
             await updateDoc(docRef, {
                 messages,
                 updatedAt: serverTimestamp(),
             });
-            return { success: true, chatId: currentChatId };
+            return { success: true, chatId: chatId };
         } else {
             // This is a new chat, create a new document
             const title = messages.find(m => m.role === 'user')?.content.substring(0, 30) || 'New Chat';

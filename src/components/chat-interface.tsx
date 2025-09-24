@@ -18,11 +18,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Send, ThumbsUp, ThumbsDown, Book, Search, Mic, LogOut } from "lucide-react";
+import { Send, ThumbsUp, ThumbsDown, Book, Search, Mic, LogOut, Volume2, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { askQuestion } from "@/app/actions";
+import { askQuestion, getSpeech } from "@/app/actions";
 import { getChatHistory } from "@/app/history/actions";
 import {
   Tooltip,
@@ -105,27 +105,101 @@ function UserAvatar() {
 }
 
 const AssistantMessage = ({ content }: { content: string }) => {
+  const { toast } = useToast();
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const parts = content.split(/\n\n/);
   const summary = parts.find(p => p.startsWith('**Summary:**'))?.replace('**Summary:**', '').trim();
   const details = parts.find(p => p.startsWith('**Details:**'))?.replace('**Details:**', '').trim();
+  
+  const handleSpeak = async (text: string) => {
+    if (isSpeaking) {
+        audioRef.current?.pause();
+        audioRef.current = null;
+        setIsSpeaking(false);
+        return;
+    }
+    
+    setIsSpeaking(true);
+    const result = await getSpeech({ text });
+    if (result.success && result.audio) {
+      const audio = new Audio(result.audio);
+      audioRef.current = audio;
+      audio.play();
+      audio.onended = () => {
+        setIsSpeaking(false);
+        audioRef.current = null;
+      };
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Text-to-Speech Failed',
+        description: result.error,
+      });
+      setIsSpeaking(false);
+    }
+  };
+  
+  const contentToSpeak = [summary, details].filter(Boolean).join('\n\n');
 
   if (summary && details) {
     return (
       <>
         <p className="whitespace-pre-wrap leading-relaxed font-medium">{summary}</p>
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="item-1" className="border-b-0">
-            <AccordionTrigger className="text-sm py-2 hover:no-underline justify-start gap-1">Show Details</AccordionTrigger>
-            <AccordionContent>
-              <p className="whitespace-pre-wrap leading-relaxed">{details}</p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <div className="flex flex-col gap-2">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1" className="border-b-0">
+                <AccordionTrigger className="text-sm py-2 hover:no-underline justify-start gap-1">Show Details</AccordionTrigger>
+                <AccordionContent>
+                  <p className="whitespace-pre-wrap leading-relaxed">{details}</p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            <div className="flex items-center gap-2">
+               <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSpeak(contentToSpeak)}
+                      className="h-7 w-7 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    >
+                      {isSpeaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{isSpeaking ? "Stop speaking" : "Read aloud"}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+        </div>
       </>
     );
   }
 
-  return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
+  return (
+    <div className="flex flex-col gap-2">
+        <p className="whitespace-pre-wrap leading-relaxed">{content}</p>
+        <div className="flex items-center gap-2">
+           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleSpeak(content)}
+                  className="h-7 w-7 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                >
+                  {isSpeaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{isSpeaking ? "Stop speaking" : "Read aloud"}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+    </div>
+  );
 };
 
 export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }: ChatInterfaceProps) {
@@ -133,28 +207,23 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [currentChatId, setCurrentChatId] = useState<string | undefined>(chatSession?.id);
+  const [currentChatId, setCurrentChatId] = useState<string | undefined>(undefined);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   
   useEffect(() => {
-    const initialMessages = (() => {
-        const systemMessage = {
+    if (chatSession) {
+        setCurrentChatId(chatSession.id);
+        setMessages(chatSession.messages.map((m, i) => ({ ...m, id: `${chatSession.id}-${i}` })));
+    } else {
+        setCurrentChatId(undefined);
+        setMessages([{
             id: "1",
             role: "assistant" as const,
             content: "Welcome to MediLexica. How can I help you with your medical questions today?",
-        };
-
-        if (chatSession) {
-            setCurrentChatId(chatSession.id);
-            return chatSession.messages.map((m, i) => ({ ...m, id: `${chatSession.id}-${i}` }));
-        }
-        
-        setCurrentChatId(undefined);
-        return [systemMessage];
-    })();
-    setMessages(initialMessages);
+        }]);
+    }
   }, [chatSession]);
 
 
@@ -238,26 +307,27 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
       isTyping: true
     };
     
-    const currentMessages = [...messages, userMessage];
+    const currentMessages = messages.filter(m => m.role !== 'system' && !m.isTyping);
     setMessages((prev) => [...prev, userMessage, typingMessage]);
     form.reset();
 
     const result = await askQuestion({
       question: values.message,
       language: selectedLanguage,
-      messages: currentMessages.map(m => ({role: m.role, content: m.content})),
+      messages: [...currentMessages, userMessage],
       chatId: currentChatId
     });
     
+    setMessages((prev) => prev.filter(m => m.id !== typingMessage.id));
+
     if (result.success && result.answer) {
       const assistantMessage: Message = {
-        id: typingMessage.id, // Replace typing message
+        id: String(Date.now() + 2),
         role: "assistant",
         content: result.answer,
       };
-      setMessages((prev) => prev.map(m => m.id === typingMessage.id ? assistantMessage : m));
+      setMessages((prev) => [...prev.filter(m => m.id !== userMessage.id), userMessage, assistantMessage]);
       
-      const isNewChat = !currentChatId;
       if (result.chatId) {
         setCurrentChatId(result.chatId);
         onHistoryUpdate(result.chatId);
@@ -268,7 +338,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }
         title: "Error",
         description: result.error,
       });
-       setMessages((prev) => prev.filter(m => m.id !== typingMessage.id));
+       setMessages((prev) => prev.filter(m => m.id !== typingMessage.id && m.id !== userMessage.id));
     }
     setIsSubmitting(false);
   }
