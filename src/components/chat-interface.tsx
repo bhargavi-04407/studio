@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search, Mic } from "lucide-react";
+import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search, Mic, LogOut } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,6 +30,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { auth } from "@/lib/firebase";
 
 
 const chatFormSchema = z.object({
@@ -328,15 +335,42 @@ import Image from "next/image";
 
 function UserAvatar() {
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+      toast({ title: "Signed out successfully!" });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign out failed",
+        description: error.message,
+      });
+    }
+  };
+
   return (
-    <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
-      {user?.photoURL ? (
-        <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
-      ) : (
-        <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-          <span>🙂</span>
-        </AvatarFallback>
-      )}
-    </Avatar>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background cursor-pointer">
+          {user?.photoURL ? (
+            <Image src={user.photoURL} alt={user.displayName || "user"} width={40} height={40} />
+          ) : (
+            <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+              <span>🙂</span>
+            </AvatarFallback>
+          )}
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sign out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
+
+    
