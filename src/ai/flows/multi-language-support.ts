@@ -51,11 +51,7 @@ Use the provided conversation history to understand the context of the user's qu
 {{#if history}}
 Conversation History (in {{sourceLanguage}}):
 {{#each history}}
-  {{#if (eq role 'user')}}
-User: {{{content}}}
-  {{else if (eq role 'assistant')}}
-Assistant: {{{content}}}
-  {{/if}}
+{{role}}: {{{content}}}
 {{/each}}
 {{/if}}
 

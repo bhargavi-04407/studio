@@ -5,7 +5,7 @@
  *
  * - intelligentMedicalChat - A function that handles medical questions and provides answers based on the Gale Encyclopedia.
  * - IntelligentMedicalChatInput - The input type for the intelligentMedicalChat function.
- * - IntelligentMedicalChatOutput - The return type for the intelligentMedicalChat function.
+ * - IntelligentMedicalChatOutput - The return type for the intelligentMedical-chat function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -42,11 +42,7 @@ First, provide a short, one or two sentence summary of the answer. Then, provide
 {{#if history}}
 Conversation History:
 {{#each history}}
-  {{#if (eq role 'user')}}
-User: {{{content}}}
-  {{else if (eq role 'assistant')}}
-Assistant: {{{content}}}
-  {{/if}}
+{{role}}: {{{content}}}
 {{/each}}
 {{/if}}
 
