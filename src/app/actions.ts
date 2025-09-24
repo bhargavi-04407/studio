@@ -49,7 +49,7 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
 
         if (messagesToSave.length > 0) {
              const result = await saveChatSession({userId, messages: messagesToSave, chatId: newChatId});
-             if (result.success) {
+             if (result.success && result.chatId) {
                 newChatId = result.chatId;
              }
         }

@@ -79,7 +79,7 @@ export default function Home() {
           key={selectedChat?.id || 'new-chat'}
           selectedLanguage={selectedLanguage}
           chatSession={selectedChat}
-          onNewChatCreated={handleHistoryUpdate}
+          onHistoryUpdate={handleHistoryUpdate}
         />
       </div>
       <div className="hidden md:block md:w-2/5 lg:w-1/3 h-full border-l border-gray-200/50 dark:border-gray-800/50">

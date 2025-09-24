@@ -18,21 +18,10 @@ const ChatSessionInputSchema = z.object({
 
 type ChatSessionInput = z.infer<typeof ChatSessionInputSchema>;
 
-async function createNewChat(userId: string, messages: z.infer<typeof MessageSchema>[]) {
-    const title = messages.find(m => m.role === 'user')?.content.substring(0, 30) || 'New Chat';
-    const newDocRef = await addDoc(collection(db, 'chatSessions'), {
-        userId,
-        messages,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        title,
-    });
-    return { success: true, chatId: newDocRef.id };
-}
-
 export async function saveChatSession(input: ChatSessionInput) {
     const parseResult = ChatSessionInputSchema.safeParse(input);
     if (!parseResult.success) {
+        console.error('Invalid input for saveChatSession:', parseResult.error);
         return { success: false, error: 'Invalid input.' };
     }
     const { userId, messages, chatId } = parseResult.data;
@@ -43,20 +32,25 @@ export async function saveChatSession(input: ChatSessionInput) {
     
     try {
         if (chatId) {
+            // Update an existing chat
             const docRef = doc(db, 'chatSessions', chatId);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists() && docSnap.data().userId === userId) {
-                await setDoc(docRef, {
-                    messages,
-                    updatedAt: serverTimestamp(),
-                }, { merge: true });
-                 return { success: true, chatId: docRef.id };
-            }
+            await setDoc(docRef, {
+                messages,
+                updatedAt: serverTimestamp(),
+            }, { merge: true });
+            return { success: true, chatId: docRef.id };
+        } else {
+            // Create a new chat
+            const title = messages.find(m => m.role === 'user')?.content.substring(0, 30) || 'New Chat';
+            const newDocRef = await addDoc(collection(db, 'chatSessions'), {
+                userId,
+                messages,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+                title,
+            });
+            return { success: true, chatId: newDocRef.id };
         }
-        // If no chatId, or if chatId is invalid, create a new chat
-        return await createNewChat(userId, messages);
-
     } catch (error) {
         console.error('Error saving chat session: ', error);
         return { success: false, error: 'Failed to save chat session.' };

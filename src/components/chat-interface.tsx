@@ -59,7 +59,7 @@ type ChatSession = Awaited<ReturnType<typeof getChatHistory>>['history'][0];
 interface ChatInterfaceProps {
   selectedLanguage: string;
   chatSession: ChatSession | null;
-  onNewChatCreated: (chatId?: string) => void;
+  onHistoryUpdate: (chatId?: string) => void;
   key: string;
 }
 
@@ -129,7 +129,7 @@ const AssistantMessage = ({ content }: { content: string }) => {
   return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
 };
 
-export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated }: ChatInterfaceProps) {
+export function ChatInterface({ selectedLanguage, chatSession, onHistoryUpdate }: ChatInterfaceProps) {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,27 +139,24 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   
-  const initialMessages = useMemo(() => {
-    const systemMessage = {
-      id: "1",
-      role: "assistant" as const,
-      content:
-        "Welcome to MediLexica. How can I help you with your medical questions today?",
-    };
-
-    if (chatSession) {
-      setCurrentChatId(chatSession.id);
-      return [
-        ...chatSession.messages.map((m, i) => ({...m, id: `${chatSession.id}-${i}`}))
-      ];
-    }
-    setCurrentChatId(undefined);
-    return [systemMessage];
-  }, [chatSession]);
-
   useEffect(() => {
+    const initialMessages = (() => {
+        const systemMessage = {
+            id: "1",
+            role: "assistant" as const,
+            content: "Welcome to MediLexica. How can I help you with your medical questions today?",
+        };
+
+        if (chatSession) {
+            setCurrentChatId(chatSession.id);
+            return chatSession.messages.map((m, i) => ({ ...m, id: `${chatSession.id}-${i}` }));
+        }
+        
+        setCurrentChatId(undefined);
+        return [systemMessage];
+    })();
     setMessages(initialMessages);
-  }, [initialMessages]);
+  }, [chatSession]);
 
 
   const form = useForm<z.infer<typeof chatFormSchema>>({
@@ -170,14 +167,12 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
   });
 
   useEffect(() => {
-    setTimeout(() => {
-      if (scrollAreaRef.current) {
+    if (scrollAreaRef.current) {
         scrollAreaRef.current.scrollTo({
           top: scrollAreaRef.current.scrollHeight,
           behavior: "smooth",
         });
       }
-    }, 100)
   }, [messages]);
 
   useEffect(() => {
@@ -266,15 +261,12 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
       const isNewChat = !currentChatId;
       if (result.chatId) {
         setCurrentChatId(result.chatId);
+        if (isNewChat) {
+          onHistoryUpdate(result.chatId);
+        } else {
+          onHistoryUpdate();
+        }
       }
-      
-      // After getting a response, refresh the history list
-      if (isNewChat && result.chatId) {
-        onNewChatCreated(result.chatId);
-      } else {
-        onNewChatCreated();
-      }
-
     } else {
       toast({
         variant: "destructive",
