@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search } from "lucide-react";
+import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -56,7 +56,10 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
     },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+
 
   const form = useForm<z.infer<typeof chatFormSchema>>({
     resolver: zodResolver(chatFormSchema),
@@ -75,6 +78,52 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
       }
     }, 100)
   }, [messages]);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.lang = selectedLanguage;
+      recognitionRef.current.interimResults = false;
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        form.setValue("message", transcript);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        toast({
+            variant: "destructive",
+            title: "Voice Recognition Error",
+            description: event.error,
+        });
+        setIsListening(false);
+      };
+       recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, [selectedLanguage, form, toast]);
+
+  const handleVoiceSearch = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+      setIsListening(true);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Voice Recognition Not Supported",
+            description: "Your browser does not support voice recognition.",
+        });
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof chatFormSchema>) {
     setIsSubmitting(true);
@@ -212,8 +261,20 @@ export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
                         autoComplete="off"
                         {...field}
                         disabled={isSubmitting}
-                        className="text-base py-6 rounded-full px-6 shadow-inner bg-white dark:bg-black/20 focus-visible:ring-primary/50"
+                        className="text-base py-6 rounded-full px-14 shadow-inner bg-white dark:bg-black/20 focus-visible:ring-primary/50"
                       />
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                             <Button type="button" size="icon" onClick={handleVoiceSearch} disabled={isSubmitting} className={cn("rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute left-2 top-1/2 -translate-y-1/2", isListening ? "bg-red-500 hover:bg-red-600" : "bg-primary hover:bg-primary/90")}>
+                                <Mic className="w-5 h-5" />
+                                <span className="sr-only">Voice Search</span>
+                              </Button>
+                          </TooltipTrigger>
+                           <TooltipContent>{isListening ? "Stop listening" : "Start listening"}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
                       <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-10 h-10 shadow-md hover:shadow-lg transition-all absolute right-2 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary/90">
                         <Send className="w-5 h-5" />
                         <span className="sr-only">Send</span>
