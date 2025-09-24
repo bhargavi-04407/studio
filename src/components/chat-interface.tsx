@@ -41,7 +41,11 @@ type Message = {
   isTyping?: boolean;
 };
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  selectedLanguage: string;
+}
+
+export function ChatInterface({ selectedLanguage }: ChatInterfaceProps) {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -90,10 +94,9 @@ export function ChatInterface() {
     setMessages((prev) => [...prev, userMessage, typingMessage]);
     form.reset();
     
-    // We get the language from the InfoPanel, but since we don't have cross-component state, we'll hardcode 'en' for now
     const result = await askQuestion({
       question: values.message,
-      language: "en",
+      language: selectedLanguage,
     });
 
     if (result.success && result.answer) {

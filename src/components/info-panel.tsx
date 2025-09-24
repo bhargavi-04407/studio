@@ -36,10 +36,11 @@ const languages = [
 
 interface InfoPanelProps {
   terms: MedicalTerm[];
+  selectedLanguage: string;
+  onLanguageChange: (language: string) => void;
 }
 
-export function InfoPanel({ terms }: InfoPanelProps) {
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+export function InfoPanel({ terms, selectedLanguage, onLanguageChange }: InfoPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredTerms = useMemo(() => {
@@ -73,7 +74,7 @@ export function InfoPanel({ terms }: InfoPanelProps) {
           <Languages className="w-4 h-4" />
           Chat Language
         </label>
-        <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+        <Select value={selectedLanguage} onValueChange={onLanguageChange}>
           <SelectTrigger className="w-full shadow-md bg-white dark:bg-black/20">
             <SelectValue placeholder="Language" />
           </SelectTrigger>
