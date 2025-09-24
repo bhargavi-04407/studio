@@ -205,7 +205,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
   }
 
   return (
-    <div className="flex flex-col h-full bg-transparent text-foreground">
+    <div className="flex flex-col h-full bg-black text-white">
       <div className="flex-1 overflow-hidden p-6">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="space-y-8 max-w-4xl mx-auto">
@@ -241,7 +241,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-green-100 hover:text-green-600">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-green-100 hover:text-green-600">
                               <ThumbsUp className="w-4 h-4" />
                             </Button>
                           </TooltipTrigger>
@@ -249,7 +249,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-red-100 hover:text-red-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-red-100 hover:text-red-600">
                                 <ThumbsDown className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
@@ -257,7 +257,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-blue-100 hover:text-blue-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-blue-100 hover:text-blue-600">
                                 <Book className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
@@ -265,7 +265,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         </Tooltip>
                          <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-600 hover:bg-yellow-100 hover:text-yellow-600">
+                             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:bg-yellow-100 hover:text-yellow-600">
                                 <Search className="w-4 h-4" />
                               </Button>
                           </TooltipTrigger>
@@ -276,7 +276,11 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                   )}
                 </div>
                 {message.role === "user" && (
-                   <UserAvatar />
+                  <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-lg bg-background">
+                    <AvatarFallback className="bg-primary/20 text-primary text-2xl">
+                      <span>🙂</span>
+                    </AvatarFallback>
+                  </Avatar>
                 )}
               </div>
             ))}
@@ -286,7 +290,8 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
 
       <div className="p-4 border-t bg-transparent max-w-4xl mx-auto w-full">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-4">
+             <UserAvatar />
             <FormField
               control={form.control}
               name="message"
@@ -299,7 +304,7 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
                         autoComplete="off"
                         {...field}
                         disabled={isSubmitting}
-                        className="text-base py-6 rounded-full px-14 shadow-inner bg-white dark:bg-black/20 focus-visible:ring-primary/50"
+                        className="text-base py-6 rounded-full px-14 shadow-inner bg-white dark:bg-black/20 text-black focus-visible:ring-primary/50"
                       />
                       <TooltipProvider>
                         <Tooltip>
@@ -375,4 +380,5 @@ function UserAvatar() {
     </DropdownMenu>
   );
 }
+    
     
