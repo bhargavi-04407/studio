@@ -25,7 +25,7 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     let answer: string;
     let newChatId = chatId;
     
-    // We don't want to send the full message list, just the history
+    // We don't want to send the full message list to the AI, just the history
     const history = messages.slice(0, -1);
 
     if (language === "en") {
@@ -48,7 +48,7 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
             .map(m => ({role: m.role as 'user' | 'assistant', content: m.content}));
 
         if (messagesToSave.length > 0) {
-             const result = await saveChatSession(userId, messagesToSave, newChatId);
+             const result = await saveChatSession({userId, messages: messagesToSave, chatId: newChatId});
              if (result.success) {
                 newChatId = result.chatId;
              }

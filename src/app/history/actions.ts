@@ -10,19 +10,39 @@ const MessageSchema = z.object({
     content: z.string(),
 });
 
-const ChatSessionSchema = z.object({
+const ChatSessionInputSchema = z.object({
     userId: z.string(),
     messages: z.array(MessageSchema),
+    chatId: z.string().optional(),
 });
 
-export async function saveChatSession(userId: string, messages: z.infer<typeof MessageSchema>[], chatId?: string) {
+type ChatSessionInput = z.infer<typeof ChatSessionInputSchema>;
+
+async function createNewChat(userId: string, messages: z.infer<typeof MessageSchema>[]) {
+    const title = messages.find(m => m.role === 'user')?.content.substring(0, 30) || 'New Chat';
+    const newDocRef = await addDoc(collection(db, 'chatSessions'), {
+        userId,
+        messages,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        title,
+    });
+    return { success: true, chatId: newDocRef.id };
+}
+
+export async function saveChatSession(input: ChatSessionInput) {
+    const parseResult = ChatSessionInputSchema.safeParse(input);
+    if (!parseResult.success) {
+        return { success: false, error: 'Invalid input.' };
+    }
+    const { userId, messages, chatId } = parseResult.data;
+
     if (!userId) {
         return { success: false, error: 'User not authenticated.' };
     }
     
     try {
         if (chatId) {
-            // If chatId is provided, update the existing document
             const docRef = doc(db, 'chatSessions', chatId);
             const docSnap = await getDoc(docRef);
 
@@ -32,30 +52,15 @@ export async function saveChatSession(userId: string, messages: z.infer<typeof M
                     updatedAt: serverTimestamp(),
                 }, { merge: true });
                  return { success: true, chatId: docRef.id };
-            } else {
-                 // Fallback to creating a new chat if ID is invalid or doesn't belong to user
-                 return createNewChat(userId, messages);
             }
-        } else {
-            // If no chatId, create a new chat session
-            return createNewChat(userId, messages);
         }
+        // If no chatId, or if chatId is invalid, create a new chat
+        return await createNewChat(userId, messages);
 
     } catch (error) {
         console.error('Error saving chat session: ', error);
         return { success: false, error: 'Failed to save chat session.' };
     }
-}
-
-async function createNewChat(userId: string, messages: z.infer<typeof MessageSchema>[]) {
-    const newDocRef = await addDoc(collection(db, 'chatSessions'), {
-        userId,
-        messages,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        title: messages[0]?.content.substring(0, 30) || 'New Chat'
-    });
-    return { success: true, chatId: newDocRef.id };
 }
 
 
@@ -75,14 +80,15 @@ export async function getChatHistory(userId: string) {
         const querySnapshot = await getDocs(q);
         const history = querySnapshot.docs.map(doc => {
             const data = doc.data();
+            // Ensure updatedAt exists and is a timestamp before converting
             const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date();
             const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
             return {
                 id: doc.id,
-                title: data.title,
+                title: data.title || 'Chat',
                 createdAt: createdAt.toISOString(),
                 updatedAt: updatedAt.toISOString(),
-                messages: data.messages
+                messages: data.messages || []
             };
         });
         

@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Bot, Send, User, ThumbsUp, ThumbsDown, Book, Search, Mic, LogOut } from "lucide-react";
+import { Send, ThumbsUp, ThumbsDown, Book, Search, Mic, LogOut } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -263,14 +263,14 @@ export function ChatInterface({ selectedLanguage, chatSession, onNewChatCreated 
       };
       setMessages((prev) => prev.map(m => m.id === typingMessage.id ? assistantMessage : m));
       
-      if (result.chatId && result.chatId !== currentChatId) {
+      const isNewChat = !currentChatId;
+      if (result.chatId) {
         setCurrentChatId(result.chatId);
       }
       
       // After getting a response, refresh the history list
-      if (!currentChatId) {
-         // Use a timeout to give the database a moment to update
-        setTimeout(() => onNewChatCreated(result.chatId), 1000);
+      if (isNewChat && result.chatId) {
+        onNewChatCreated(result.chatId);
       } else {
         onNewChatCreated();
       }
