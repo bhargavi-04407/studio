@@ -129,14 +129,14 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
-        <header className="p-4 border-b flex items-center justify-between">
+        <header className="p-4 border-b flex items-center justify-between bg-card shadow-sm">
             <div>
-                <h1 className="text-2xl font-bold font-headline">Intelligent Medical Chat</h1>
+                <h1 className="text-2xl font-bold font-headline text-primary">Intelligent Medical Chat</h1>
                 <p className="text-muted-foreground">Ask medical questions and get answers from Gale Encyclopedia.</p>
             </div>
-            <div className="w-40">
+            <div className="w-48">
                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                <SelectTrigger>
+                <SelectTrigger className="shadow-sm">
                     <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,26 +151,26 @@ export function ChatInterface() {
         </header>
 
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
+        <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
           <div className="space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={cn(
-                  "flex items-start gap-3",
+                  "flex items-start gap-4",
                   message.role === "user" && "justify-end"
                 )}
               >
                 {message.role === "assistant" && (
-                  <Avatar className="w-8 h-8 border">
-                    <AvatarFallback>
-                      <Bot className="w-5 h-5 text-primary" />
+                  <Avatar className="w-10 h-10 border-2 border-primary shadow-sm">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      <Bot className="w-6 h-6" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={cn(
-                    "max-w-md rounded-lg p-3 text-sm",
+                    "max-w-xl rounded-xl p-4 text-base shadow-md",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-card"
@@ -179,9 +179,9 @@ export function ChatInterface() {
                   <p className="whitespace-pre-wrap">{message.content}</p>
                 </div>
                 {message.role === "user" && (
-                  <Avatar className="w-8 h-8 border">
-                    <AvatarFallback>
-                      <User className="w-5 h-5 text-primary" />
+                   <Avatar className="w-10 h-10 border-2 border-primary shadow-sm">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      <User className="w-6 h-6" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -191,9 +191,9 @@ export function ChatInterface() {
         </ScrollArea>
       </div>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t bg-card shadow-t-sm">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-start gap-4">
             <FormField
               control={form.control}
               name="message"
@@ -205,14 +205,15 @@ export function ChatInterface() {
                       autoComplete="off"
                       {...field}
                       disabled={isSubmitting}
+                      className="text-base py-6 rounded-full px-6 shadow-inner"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" size="icon" disabled={isSubmitting}>
-              <Send className="w-5 h-5" />
+            <Button type="submit" size="icon" disabled={isSubmitting} className="rounded-full w-12 h-12 shadow-sm">
+              <Send className="w-6 h-6" />
               <span className="sr-only">Send</span>
             </Button>
           </form>
