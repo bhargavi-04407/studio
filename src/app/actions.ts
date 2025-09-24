@@ -3,7 +3,6 @@
 
 import { intelligentMedicalChat } from "@/ai/flows/intelligent-medical-chat";
 import { translateQuery } from "@/ai/flows/multi-language-support";
-import { searchUnsplash } from "@/lib/unsplash";
 import { z } from "zod";
 
 const AskQuestionInput = z.object({
@@ -16,13 +15,10 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
     const { question, language } = AskQuestionInput.parse(input);
 
     let answer: string;
-    let imageQuery: string | undefined;
-    let imageUrl: string | undefined;
 
     if (language === "en") {
       const response = await intelligentMedicalChat({ question });
       answer = response.answer;
-      imageQuery = response.imageQuery;
     } else {
       const response = await translateQuery({
         query: question,
@@ -30,14 +26,9 @@ export async function askQuestion(input: z.infer<typeof AskQuestionInput>) {
         targetLanguage: language,
       });
       answer = response.translatedResponse;
-      imageQuery = response.imageQuery;
     }
     
-    if (imageQuery) {
-      imageUrl = await searchUnsplash(imageQuery);
-    }
-
-    return { success: true, answer, imageUrl };
+    return { success: true, answer };
   } catch (error) {
     console.error(error);
     if (error instanceof z.ZodError) {

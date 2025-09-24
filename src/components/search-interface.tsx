@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -54,17 +53,6 @@ export function SearchInterface({ terms }: SearchInterfaceProps) {
                   <CardTitle className="font-headline text-primary">{term.term}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-4">
-                  {term.image && (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                      <Image
-                        src={term.image.imageUrl}
-                        alt={term.image.description}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        data-ai-hint={term.image.imageHint}
-                      />
-                    </div>
-                  )}
                   <CardDescription className="text-base">{term.definition}</CardDescription>
                 </CardContent>
               </Card>

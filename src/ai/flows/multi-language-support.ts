@@ -23,7 +23,6 @@ export type MultiLanguageSupportInput = z.infer<typeof MultiLanguageSupportInput
 
 const MultiLanguageSupportOutputSchema = z.object({
   translatedResponse: z.string().describe('The medical answer in the target language.'),
-  imageQuery: z.string().optional().describe('A 1-2 word search query in English for a relevant medical image of a disease if applicable. For example, "skin rash" or "inflamed appendix".'),
 });
 export type MultiLanguageSupportOutput = z.infer<typeof MultiLanguageSupportOutputSchema>;
 
@@ -40,8 +39,6 @@ A user is asking a medical question in {{sourceLanguage}}.
 Provide a comprehensive answer to their question based on the information in the Gale Encyclopedia. If it is relevant, you can suggest potential medicines.
 Your entire response must be in {{targetLanguage}}.
 
-Only if the user explicitly asks for an image of a disease, provide a short, 1-2 word image search query in English that would visually represent that disease (e.g., "skin rash", "inflamed appendix"). If the user does not ask for an image, do not provide an image query.
-
 User's question: "{{{query}}}"
 `,
 });
@@ -55,8 +52,7 @@ const multiLanguageSupportFlow = ai.defineFlow(
   async input => {
     const {output} = await multiLanguagePrompt(input);
     return {
-      translatedResponse: output!.translatedResponse,
-      imageQuery: output!.imageQuery,
+      translatedResponse: output!.translatedResponse
     };
   }
 );

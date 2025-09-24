@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +29,6 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { askQuestion } from "@/app/actions";
-import Image from "next/image";
 
 const chatFormSchema = z.object({
   message: z.string().min(1, "Message cannot be empty"),
@@ -40,7 +38,6 @@ type Message = {
   id: string;
   role: "user" | "assistant" | "system";
   content: string;
-  imageUrl?: string;
 };
 
 const languages = [
@@ -116,7 +113,6 @@ export function ChatInterface() {
         id: String(Date.now() + 2),
         role: "assistant",
         content: result.answer,
-        imageUrl: result.imageUrl,
       };
       setMessages((prev) => prev.map(m => m.id === typingMessageId ? assistantMessage : m));
     } else {
@@ -180,11 +176,6 @@ export function ChatInterface() {
                   )}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
-                   {message.imageUrl && (
-                    <div className="relative aspect-video rounded-lg overflow-hidden border">
-                      <Image src={message.imageUrl} alt="Relevant medical image" fill className="object-cover" />
-                    </div>
-                  )}
                 </div>
                 {message.role === "user" && (
                    <Avatar className="w-10 h-10 border-2 border-primary shadow-sm">
