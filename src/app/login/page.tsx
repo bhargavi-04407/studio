@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { RecaptchaVerifier, signInWithEmailAndPassword, signInWithPhoneNumber } from "firebase/auth";
+import { RecaptchaVerifier, signInWithEmailAndPassword, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -19,21 +20,25 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
+  
+  const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // @ts-ignore
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      'size': 'invisible',
-      'callback': (response: any) => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-      }
-    });
+    if (recaptchaContainerRef.current && !recaptchaVerifier.current) {
+        recaptchaVerifier.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+            'size': 'invisible',
+            'callback': (response: any) => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+    }
   }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -56,10 +61,13 @@ export default function LoginPage() {
   const handlePhoneLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (!recaptchaVerifier.current) {
+        toast({ variant: "destructive", title: "reCAPTCHA not initialized", description: "Please try again in a moment." });
+        setLoading(false);
+        return;
+    }
     try {
-      // @ts-ignore
-      const verifier = window.recaptchaVerifier;
-      const result = await signInWithPhoneNumber(auth, `+${phone}`, verifier);
+      const result = await signInWithPhoneNumber(auth, `+${phone}`, recaptchaVerifier.current);
       setConfirmationResult(result);
       setOtpSent(true);
       toast({ title: "OTP sent successfully!" });
@@ -76,6 +84,11 @@ export default function LoginPage() {
   const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (!confirmationResult) {
+        toast({ variant: "destructive", title: "OTP not sent", description: "Please request an OTP first." });
+        setLoading(false);
+        return;
+    }
     try {
       await confirmationResult.confirm(otp);
       toast({ title: "Login successful!" });
@@ -104,7 +117,7 @@ export default function LoginPage() {
               <TabsTrigger value="phone">Phone</TabsTrigger>
             </TabsList>
             <TabsContent value="email">
-              <form onSubmit={handleEmailLogin} className="space-y-4">
+              <form onSubmit={handleEmailLogin} className="space-y-4 pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -123,7 +136,7 @@ export default function LoginPage() {
               </form>
             </TabsContent>
             <TabsContent value="phone">
-               <form onSubmit={!otpSent ? handlePhoneLogin : handleOtpVerify} className="space-y-4">
+               <form onSubmit={!otpSent ? handlePhoneLogin : handleOtpVerify} className="space-y-4 pt-4">
                 {!otpSent ? (
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
@@ -151,7 +164,7 @@ export default function LoginPage() {
           </div>
         </CardContent>
       </Card>
-      <div id="recaptcha-container"></div>
+      <div ref={recaptchaContainerRef}></div>
     </div>
   );
 }

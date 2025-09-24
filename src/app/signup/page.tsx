@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
-import { RecaptchaVerifier, createUserWithEmailAndPassword, signInWithPhoneNumber, updateProfile } from "firebase/auth";
+import { RecaptchaVerifier, createUserWithEmailAndPassword, signInWithPhoneNumber, updateProfile, type ConfirmationResult } from "firebase/auth";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
+
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -20,21 +22,25 @@ export default function SignupPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
 
+  const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // @ts-ignore
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      'size': 'invisible',
-      'callback': (response: any) => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-      }
-    });
+    if (recaptchaContainerRef.current && !recaptchaVerifier.current) {
+        recaptchaVerifier.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
+            'size': 'invisible',
+            'callback': (response: any) => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+    }
   }, []);
 
   const handleEmailSignup = async (e: React.FormEvent) => {
@@ -58,10 +64,13 @@ export default function SignupPage() {
   const handlePhoneSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (!recaptchaVerifier.current) {
+        toast({ variant: "destructive", title: "reCAPTCHA not initialized", description: "Please try again in a moment." });
+        setLoading(false);
+        return;
+    }
     try {
-      // @ts-ignore
-      const verifier = window.recaptchaVerifier;
-      const result = await signInWithPhoneNumber(auth, `+${phone}`, verifier);
+      const result = await signInWithPhoneNumber(auth, `+${phone}`, recaptchaVerifier.current);
       setConfirmationResult(result);
       setOtpSent(true);
       toast({ title: "OTP sent successfully!" });
@@ -78,9 +87,16 @@ export default function SignupPage() {
   const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (!confirmationResult) {
+        toast({ variant: "destructive", title: "OTP not sent", description: "Please request an OTP first." });
+        setLoading(false);
+        return;
+    }
     try {
       const result = await confirmationResult.confirm(otp);
-      await updateProfile(result.user, { displayName });
+      if (result.user) {
+        await updateProfile(result.user, { displayName });
+      }
       toast({ title: "Account created successfully!" });
       router.push("/");
     } catch (error: any) {
@@ -161,7 +177,7 @@ export default function SignupPage() {
           </div>
         </CardContent>
       </Card>
-      <div id="recaptcha-container"></div>
+      <div ref={recaptchaContainerRef}></div>
     </div>
   );
 }
